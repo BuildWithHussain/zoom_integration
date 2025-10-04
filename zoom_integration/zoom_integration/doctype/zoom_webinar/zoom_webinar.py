@@ -68,6 +68,30 @@ class ZoomWebinar(Document):
 		else:
 			frappe.throw("Failed to create webinar on Zoom: {0}".format(response.text))
 
+	def on_update(self):
+		if not self.zoom_webinar_id:
+			return
+		self.update_webinar_on_zoom_if_applicable()
+
+	def update_webinar_on_zoom_if_applicable(self):
+		# For simplicity, we will only update the title and agenda in this example.
+		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
+		headers = get_authenticated_headers_for_zoom()
+		body = json.dumps(
+			{
+				"topic": self.title,
+				"agenda": self.agenda or self.title,
+				"duration": cint(self.duration / 60) if self.duration else 60,
+				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ssZ"),
+			}
+		 )
+
+		response = requests.patch(url, headers=headers, data=body)
+		if response.status_code == 204:
+			frappe.msgprint("Webinar updated successfully on Zoom.")
+		else:
+			frappe.throw("Failed to update webinar on Zoom: {0}".format(response.text))
+
 	def on_trash(self):
 		if self.zoom_webinar_id:
 			self.delete_webinar_on_zoom()
@@ -86,3 +110,4 @@ class ZoomWebinar(Document):
 			frappe.msgprint(frappe._("Webinar deleted successfully from Zoom."))
 		else:
 			frappe.throw(frappe._(f"Failed to delete webinar: {response.text}"))
+
