@@ -101,8 +101,7 @@
   {
    "fieldname": "agenda",
    "fieldtype": "Small Text",
-   "label": "Agenda",
-   "set_only_once": 1
+   "label": "Agenda"
   },
   {
    "fieldname": "column_break_yrqq",
@@ -116,7 +115,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-04 17:31:15.639697",
+ "modified": "2025-10-04 17:32:25.479153",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",
