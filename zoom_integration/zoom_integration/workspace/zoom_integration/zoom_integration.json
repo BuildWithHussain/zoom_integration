@@ -1,0 +1,48 @@
+{
+ "app": "zoom_integration",
+ "charts": [],
+ "content": "[{\"id\":\"FL8W9SpFCS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Zoom Settings\",\"col\":4}},{\"id\":\"DiCxsZ-kOS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Webinars\",\"col\":4}}]",
+ "creation": "2025-10-04 16:12:15.908491",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-review-points",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Zoom Integration",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2025-10-04 16:13:24.860229",
+ "modified_by": "Administrator",
+ "module": "Zoom Integration",
+ "name": "Zoom Integration",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 23.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Zoom Settings",
+   "link_to": "Zoom Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Webinars",
+   "link_to": "Zoom Webinar",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Zoom Integration",
+ "type": "Workspace"
+}

@@ -2,6 +2,13 @@
 
 Zoom Integration for Frappe. Create and manage webinars.
 
+### Setup
+
+Requires scopes:
+
+1. webinar:write:webinar
+2. webinar:write:webinar:admin
+
 ### Installation
 
 You can install this app using the [bench](https://github.com/frappe/bench) CLI:
