@@ -1,7 +1,7 @@
 {
  "app": "zoom_integration",
  "charts": [],
- "content": "[{\"id\":\"FL8W9SpFCS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Zoom Settings\",\"col\":4}},{\"id\":\"DiCxsZ-kOS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Webinars\",\"col\":4}}]",
+ "content": "[{\"id\":\"FL8W9SpFCS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Zoom Settings\",\"col\":4}},{\"id\":\"DiCxsZ-kOS\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Webinars\",\"col\":4}},{\"id\":\"Sk0TLqu3bB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Webinar Templates\",\"col\":4}}]",
  "creation": "2025-10-04 16:12:15.908491",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,7 +15,7 @@
  "label": "Zoom Integration",
  "link_type": "DocType",
  "links": [],
- "modified": "2025-10-04 16:13:24.860229",
+ "modified": "2025-10-09 20:05:18.801600",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Integration",
@@ -32,6 +32,14 @@
    "doc_view": "List",
    "label": "Zoom Settings",
    "link_to": "Zoom Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Webinar Templates",
+   "link_to": "Zoom Webinar Template",
+   "stats_filter": "[]",
    "type": "DocType"
   },
   {

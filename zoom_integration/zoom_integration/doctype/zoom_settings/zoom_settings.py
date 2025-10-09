@@ -1,7 +1,8 @@
 # Copyright (c) 2025, Build With Hussain and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+
 from frappe.model.document import Document
 
 
@@ -19,4 +20,10 @@ class ZoomSettings(Document):
 		client_secret: DF.Password | None
 	# end: auto-generated types
 
-	pass
+	@frappe.whitelist()
+	def sync_webinar_templates(self):
+		from zoom_integration.zoom_integration.doctype.zoom_webinar_template.zoom_webinar_template import (
+			sync_templates_from_zoom,
+		)
+
+		sync_templates_from_zoom()
