@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "template",
   "column_break_yrqq",
   "send_zoom_registration_email",
   "agenda",
@@ -110,12 +111,19 @@
   {
    "fieldname": "section_break_tuka",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Template",
+   "options": "Zoom Webinar Template",
+   "set_only_once": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-04 17:32:25.479153",
+ "modified": "2025-10-09 20:08:32.249175",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",

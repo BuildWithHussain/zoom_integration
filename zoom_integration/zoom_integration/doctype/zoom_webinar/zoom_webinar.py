@@ -26,6 +26,7 @@ class ZoomWebinar(Document):
 		duration: DF.Duration
 		send_zoom_registration_email: DF.Check
 		start_time: DF.Time
+		template: DF.Link | None
 		title: DF.Data
 		zoom_link: DF.Data | None
 		zoom_webinar_id: DF.Data | None
@@ -56,6 +57,7 @@ class ZoomWebinar(Document):
 					"meeting_authentication": False,  # Disable authentication for simplicity
 				},
 				"registrants_email_notification": self.send_zoom_registration_email,
+				"template_id": self.template or None
 			}
 		)
 
