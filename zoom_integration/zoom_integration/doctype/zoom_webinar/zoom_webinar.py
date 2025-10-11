@@ -57,7 +57,7 @@ class ZoomWebinar(Document):
 					"meeting_authentication": False,  # Disable authentication for simplicity
 				},
 				"registrants_email_notification": self.send_zoom_registration_email,
-				"template_id": self.template or None
+				"template_id": self.template or None,
 			}
 		)
 
@@ -86,7 +86,7 @@ class ZoomWebinar(Document):
 				"duration": cint(self.duration / 60) if self.duration else 60,
 				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ssZ"),
 			}
-		 )
+		)
 
 		response = requests.patch(url, headers=headers, data=body)
 		if response.status_code == 204:
@@ -113,3 +113,23 @@ class ZoomWebinar(Document):
 		else:
 			frappe.throw(frappe._(f"Failed to delete webinar: {response.text}"))
 
+	def add_registrant(self, email: str, first_name: str, last_name: str | None = None):
+		if not self.zoom_webinar_id:
+			frappe.throw(frappe._("Webinar not created on Zoom yet."))
+
+		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
+		headers = get_authenticated_headers_for_zoom()
+		body = json.dumps(
+			{
+				"email": email,
+				"first_name": first_name,
+				"last_name": last_name or "N/A",
+			}
+		)
+
+		response = requests.post(url, headers=headers, data=body)
+		if response.status_code == 201:
+			data = response.json()
+			return data
+		else:
+			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))

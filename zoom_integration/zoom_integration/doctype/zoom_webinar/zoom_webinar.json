@@ -122,8 +122,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-10-09 20:08:32.249175",
+ "links": [
+  {
+   "link_doctype": "Zoom Webinar Registration",
+   "link_fieldname": "webinar"
+  }
+ ],
+ "modified": "2025-10-11 17:19:38.234637",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",
