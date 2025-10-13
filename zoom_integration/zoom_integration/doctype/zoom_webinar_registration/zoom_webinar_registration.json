@@ -1,17 +1,17 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:id",
+ "autoname": "hash",
  "creation": "2025-10-11 17:07:23.865370",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "id",
   "webinar",
   "column_break_baez",
   "user",
-  "registrant_id",
   "zoom_information_section",
+  "registrant_id",
+  "column_break_hzel",
   "join_url",
   "section_break_aywe",
   "amended_from"
@@ -59,29 +59,29 @@
    "fieldtype": "Data",
    "label": "Join URL",
    "length": 400,
+   "options": "URL",
    "read_only": 1
-  },
-  {
-   "fieldname": "id",
-   "fieldtype": "Data",
-   "label": "ID",
-   "unique": 1
   },
   {
    "fieldname": "registrant_id",
    "fieldtype": "Data",
-   "label": "Registrant ID"
+   "label": "Registrant ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_hzel",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-11 17:24:37.110937",
+ "modified": "2025-10-13 14:25:18.921724",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Registration",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

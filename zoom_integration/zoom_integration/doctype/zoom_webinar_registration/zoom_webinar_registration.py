@@ -16,7 +16,6 @@ class ZoomWebinarRegistration(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
-		id: DF.Data | None
 		join_url: DF.Data | None
 		registrant_id: DF.Data | None
 		user: DF.Link | None
@@ -27,19 +26,15 @@ class ZoomWebinarRegistration(Document):
 		if not self.user:
 			self.user = frappe.session.user
 
-		email = frappe.db.get_value("User", self.user, "email")
-		if email == "Guest":
-			frappe.throw("Guest users cannot register for webinars. Please log in first.")
+		if self.user == "Guest":
+			frappe.throw("Guest user cannot register for webinar")
 
-		user_doc = frappe.get_cached_doc("User", email)
 
-		registration = frappe.get_doc("Zoom Webinar", self.webinar).add_registrant(
-			email, user_doc.first_name, user_doc.last_name
+	def before_submit(self):
+		user_doc = frappe.get_cached_doc("User", self.user)
+		registration = frappe.get_cached_doc("Zoom Webinar", self.webinar).add_registrant(
+			user_doc.email, user_doc.first_name, user_doc.last_name
 		)
 
-		self.user = email
-		self.id = registration.get("id")
 		self.join_url = registration.get("join_url")
 		self.registrant_id = registration.get("registrant_id")
-		self.docstatus = 1
-
