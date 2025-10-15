@@ -37,6 +37,9 @@ class ZoomWebinar(Document):
 		self.create_webinar_on_zoom()
 
 	def create_webinar_on_zoom(self):
+		if self.zoom_webinar_id:
+			return  # Webinar already created on Zoom
+
 		url = f"{ZOOM_API_BASE_PATH}/users/me/webinars"
 		headers = get_authenticated_headers_for_zoom()
 		body = json.dumps(
@@ -199,3 +202,39 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = 1000):
 		return attendance_details
 	else:
 		frappe.throw(f"Failed to fetch webinar attendance details: {response.text}")
+
+
+@frappe.whitelist()
+def import_existing_webinar(webinar_id: str):
+	if not webinar_id:
+		frappe.throw("Webinar ID is required.")
+
+	# Check if the webinar already exists in the system
+	existing = frappe.db.get_value("Zoom Webinar", {"zoom_webinar_id": webinar_id})
+	if existing:
+		frappe.msgprint("Webinar already exists in the system.")
+		return existing
+
+	url = f"{ZOOM_API_BASE_PATH}/webinars/{webinar_id}"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.get(url, headers=headers)
+
+	if response.status_code == 200:
+		data = response.json()
+		webinar = frappe.get_doc(
+			{
+				"doctype": "Zoom Webinar",
+				"title": data.get("topic"),
+				"agenda": data.get("agenda") or data.get("topic"),
+				"date": data.get("start_time", "").split("T")[0] if data.get("start_time") else None,
+				"start_time": data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None,
+				"duration": data.get("duration", 60) * 60,  # Convert minutes to seconds
+				"zoom_webinar_id": data.get("id"),
+				"zoom_link": data.get("join_url"),
+			}
+		)
+		webinar.insert(ignore_permissions=True)
+		frappe.msgprint("Webinar imported successfully from Zoom.")
+		return webinar.name
+	else:
+		frappe.throw(f"Failed to fetch webinar details: {response.text}")

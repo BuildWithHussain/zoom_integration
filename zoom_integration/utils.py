@@ -31,3 +31,16 @@ def get_authenticated_headers_for_zoom():
 		"Authorization": "Bearer " + authenticate(),
 		"content-type": "application/json",
 	}
+
+
+@frappe.whitelist()
+def get_upcoming_webinars():
+	url = f"{ZOOM_API_BASE_PATH}/users/me/webinars?type=upcoming"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.get(url, headers=headers)
+
+	if response.status_code == 200:
+		data = response.json()
+		return data.get("webinars", [])
+	else:
+		frappe.throw(f"Failed to fetch upcoming webinars: {response.text}")
