@@ -19,6 +19,7 @@
   "duration",
   "meeting_details_section",
   "zoom_link",
+  "attendance_synced",
   "column_break_lihm",
   "zoom_webinar_id",
   "section_break_tuka",
@@ -118,6 +119,13 @@
    "label": "Template",
    "options": "Zoom Webinar Template",
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "attendance_synced",
+   "fieldtype": "Check",
+   "label": "Attendance Synced?",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -126,9 +134,13 @@
   {
    "link_doctype": "Zoom Webinar Registration",
    "link_fieldname": "webinar"
+  },
+  {
+   "link_doctype": "Zoom Webinar Attendance Record",
+   "link_fieldname": "webinar"
   }
  ],
- "modified": "2025-10-11 17:19:38.234637",
+ "modified": "2025-10-15 12:49:18.985894",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",

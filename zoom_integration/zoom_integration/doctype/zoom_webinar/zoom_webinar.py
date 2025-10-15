@@ -21,6 +21,7 @@ class ZoomWebinar(Document):
 		from frappe.types import DF
 
 		agenda: DF.SmallText | None
+		attendance_synced: DF.Check
 		date: DF.Date
 		description: DF.TextEditor | None
 		duration: DF.Duration
@@ -133,3 +134,68 @@ class ZoomWebinar(Document):
 			return data
 		else:
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
+
+	@frappe.whitelist()
+	def sync_attendance(self):
+		details = get_webinar_attendance_details(self.name)
+
+		for attendance in details:
+			registration = frappe.db.get_value("Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name")
+
+			frappe.get_doc(
+				{
+					"doctype": "Zoom Webinar Attendance Record",
+					"registration": registration,
+					"webinar": self.name,
+					"user_email": attendance.get("user_email"),
+					"name": attendance.get("name"),
+					"total_duration": attendance.get("total_duration"),
+				}
+			).insert(ignore_permissions=True, ignore_if_duplicate=True).submit()
+
+		self.attendance_synced = 1
+		self.save()
+
+def get_webinar_attendance_details(webinar_id: str, limit: int = 1000):
+	url = f"{ZOOM_API_BASE_PATH}/past_webinars/{webinar_id}/participants?page_size={limit}"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.get(url, headers=headers)
+
+	if response.status_code == 200:
+		data = response.json()
+		attendance_details = data.get("participants", [])
+
+		if data.get("total_records", 0) > 1000:
+			frappe.throw(
+				"Attendance details exceed the limit of 300 participants. Pagination not implemented yet."
+			)
+
+		# process the attendance to sum the duration based on user email
+		# since the same user can join multiple times, we will sum their durations
+		attendance_summary = {}
+		for participant in attendance_details:
+			email = participant.get("user_email")
+			if email:
+				if email not in attendance_summary:
+					attendance_summary[email] = {
+						"name": participant.get("name"),
+						"total_duration": 0,
+						"registrant_id": participant.get("registrant_id"),
+					}
+				attendance_summary[email]["total_duration"] += participant.get("duration", 0)
+
+		# Convert the summary to a list of dictionaries
+		attendance_details = [
+			{
+				"user_email": email,
+				"name": details["name"],
+				"total_duration": details["total_duration"],
+			}
+			for email, details in attendance_summary.items()
+		]
+		# Sort by total duration in descending order
+		attendance_details.sort(key=lambda x: x["total_duration"], reverse=True)
+
+		return attendance_details
+	else:
+		frappe.throw(f"Failed to fetch webinar attendance details: {response.text}")

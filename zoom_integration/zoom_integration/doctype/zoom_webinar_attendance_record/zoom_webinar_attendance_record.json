@@ -1,24 +1,22 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "hash",
- "creation": "2025-10-11 17:07:23.865370",
+ "autoname": "prompt",
+ "creation": "2025-10-15 12:37:04.789164",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "webinar",
-  "column_break_baez",
-  "user",
-  "zoom_information_section",
-  "registrant_id",
-  "column_break_hzel",
-  "join_url",
-  "section_break_aywe",
+  "user_email",
+  "column_break_bwzj",
+  "registration",
+  "total_duration",
+  "section_break_20sm",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "section_break_aywe",
+   "fieldname": "section_break_20sm",
    "fieldtype": "Section Break"
   },
   {
@@ -26,7 +24,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Zoom Webinar Registration",
+   "options": "Zoom Webinar Attendance Record",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -35,56 +33,44 @@
    "fieldname": "webinar",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Webinar",
    "options": "Zoom Webinar",
    "reqd": 1
   },
   {
-   "fieldname": "user",
+   "fieldname": "registration",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "User",
-   "options": "User"
+   "label": "Registration",
+   "options": "Zoom Webinar Registration"
   },
   {
-   "fieldname": "column_break_baez",
+   "fieldname": "total_duration",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "label": "Total Duration",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bwzj",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "zoom_information_section",
-   "fieldtype": "Section Break",
-   "label": "Zoom Information"
-  },
-  {
-   "fieldname": "join_url",
+   "fieldname": "user_email",
    "fieldtype": "Data",
-   "label": "Join URL",
-   "length": 400,
-   "options": "URL",
-   "read_only": 1
-  },
-  {
-   "fieldname": "registrant_id",
-   "fieldtype": "Data",
-   "label": "Registrant ID",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_hzel",
-   "fieldtype": "Column Break"
+   "label": "User Email",
+   "options": "Email"
   }
  ],
  "grid_page_length": 50,
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-13 14:56:07.947814",
+ "modified": "2025-10-15 12:51:07.402828",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Registration",
- "naming_rule": "Random",
+ "name": "Zoom Webinar Attendance Record",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -101,23 +87,23 @@
    "write": 1
   },
   {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Zoom Manager",
+   "select": 1,
    "share": 1,
    "submit": 1,
    "write": 1
   }
  ],
+ "read_only": 1,
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "user_email"
 }
