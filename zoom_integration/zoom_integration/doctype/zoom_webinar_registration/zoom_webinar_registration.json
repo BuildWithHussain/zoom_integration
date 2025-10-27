@@ -9,6 +9,8 @@
   "webinar",
   "column_break_baez",
   "user",
+  "section_break_rdgw",
+  "additional_params",
   "zoom_information_section",
   "registrant_id",
   "column_break_hzel",
@@ -74,13 +76,23 @@
   {
    "fieldname": "column_break_hzel",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rdgw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "additional_params",
+   "fieldtype": "Table",
+   "label": "Additional Params",
+   "options": "Zoom Webinar Additional Param"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-13 14:56:07.947814",
+ "modified": "2025-10-27 17:09:22.001138",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Registration",

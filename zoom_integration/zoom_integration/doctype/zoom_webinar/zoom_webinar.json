@@ -15,6 +15,7 @@
   "date",
   "column_break_yykb",
   "start_time",
+  "timezone",
   "column_break_ouxy",
   "duration",
   "meeting_details_section",
@@ -126,6 +127,11 @@
    "fieldtype": "Check",
    "label": "Attendance Synced?",
    "read_only": 1
+  },
+  {
+   "fieldname": "timezone",
+   "fieldtype": "Autocomplete",
+   "label": "Timezone"
   }
  ],
  "grid_page_length": 50,
@@ -140,8 +146,8 @@
    "link_fieldname": "webinar"
   }
  ],
- "modified": "2025-10-15 12:49:18.985894",
- "modified_by": "Administrator",
+ "modified": "2025-10-27 16:51:55.083180",
+ "modified_by": "hussain@frappe.io",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",
  "naming_rule": "By fieldname",

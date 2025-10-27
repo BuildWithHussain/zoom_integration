@@ -28,6 +28,7 @@ class ZoomWebinar(Document):
 		send_zoom_registration_email: DF.Check
 		start_time: DF.Time
 		template: DF.Link | None
+		timezone: DF.Autocomplete | None
 		title: DF.Data
 		zoom_link: DF.Data | None
 		zoom_webinar_id: DF.Data | None
@@ -49,6 +50,7 @@ class ZoomWebinar(Document):
 				"type": 5,  # Scheduled webinar
 				"duration": cint(self.duration / 60) if self.duration else 60,
 				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ssZ"),
+				"timezone": self.timezone or "Asia/Calcutta",
 				"settings": {
 					"host_video": True,
 					"panelists_video": True,
@@ -117,9 +119,14 @@ class ZoomWebinar(Document):
 		else:
 			frappe.throw(frappe._(f"Failed to delete webinar: {response.text}"))
 
-	def add_registrant(self, email: str, first_name: str, last_name: str | None = None):
+	def add_registrant(
+		self, email: str, first_name: str, last_name: str | None = None, additional_params: dict | None = None
+	):
 		if not self.zoom_webinar_id:
 			frappe.throw(frappe._("Webinar not created on Zoom yet."))
+
+		if not additional_params:
+			additional_params = {}
 
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
 		headers = get_authenticated_headers_for_zoom()
@@ -128,6 +135,7 @@ class ZoomWebinar(Document):
 				"email": email,
 				"first_name": first_name,
 				"last_name": last_name or "N/A",
+				**additional_params
 			}
 		)
 
@@ -143,7 +151,9 @@ class ZoomWebinar(Document):
 		details = get_webinar_attendance_details(self.name)
 
 		for attendance in details:
-			registration = frappe.db.get_value("Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name")
+			registration = frappe.db.get_value(
+				"Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name"
+			)
 
 			frappe.get_doc(
 				{
@@ -158,6 +168,7 @@ class ZoomWebinar(Document):
 
 		self.attendance_synced = 1
 		self.save()
+
 
 def get_webinar_attendance_details(webinar_id: str, limit: int = 1000):
 	url = f"{ZOOM_API_BASE_PATH}/past_webinars/{webinar_id}/participants?page_size={limit}"
@@ -221,20 +232,22 @@ def import_existing_webinar(webinar_id: str):
 
 	if response.status_code == 200:
 		data = response.json()
-		webinar = frappe.get_doc(
-			{
-				"doctype": "Zoom Webinar",
-				"title": data.get("topic"),
-				"agenda": data.get("agenda") or data.get("topic"),
-				"date": data.get("start_time", "").split("T")[0] if data.get("start_time") else None,
-				"start_time": data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None,
-				"duration": data.get("duration", 60) * 60,  # Convert minutes to seconds
-				"zoom_webinar_id": data.get("id"),
-				"zoom_link": data.get("join_url"),
-			}
-		)
-		webinar.insert(ignore_permissions=True)
-		frappe.msgprint("Webinar imported successfully from Zoom.")
-		return webinar.name
+		return data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None
+		return data
+		# webinar = frappe.get_doc(
+		# 	{
+		# 		"doctype": "Zoom Webinar",
+		# 		"title": data.get("topic"),
+		# 		"agenda": data.get("agenda") or data.get("topic"),
+		# 		"date": data.get("start_time", "").split("T")[0] if data.get("start_time") else None,
+		# 		"start_time": data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None,
+		# 		"duration": data.get("duration", 60) * 60,  # Convert minutes to seconds
+		# 		"zoom_webinar_id": data.get("id"),
+		# 		"zoom_link": data.get("join_url"),
+		# 	}
+		# )
+		# webinar.insert(ignore_permissions=True)
+		# frappe.msgprint("Webinar imported successfully from Zoom.")
+		# return webinar.name
 	else:
 		frappe.throw(f"Failed to fetch webinar details: {response.text}")
