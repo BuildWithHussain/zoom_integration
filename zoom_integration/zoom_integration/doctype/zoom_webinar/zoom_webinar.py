@@ -10,6 +10,7 @@ from frappe.utils import cint, format_datetime
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
 
+from frappe.utils.data import convert_utc_to_timezone, get_datetime
 
 class ZoomWebinar(Document):
 	# begin: auto-generated types
@@ -232,22 +233,24 @@ def import_existing_webinar(webinar_id: str):
 
 	if response.status_code == 200:
 		data = response.json()
-		return data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None
-		return data
-		# webinar = frappe.get_doc(
-		# 	{
-		# 		"doctype": "Zoom Webinar",
-		# 		"title": data.get("topic"),
-		# 		"agenda": data.get("agenda") or data.get("topic"),
-		# 		"date": data.get("start_time", "").split("T")[0] if data.get("start_time") else None,
-		# 		"start_time": data.get("start_time", "").split("T")[1].replace("Z", "") if data.get("start_time") else None,
-		# 		"duration": data.get("duration", 60) * 60,  # Convert minutes to seconds
-		# 		"zoom_webinar_id": data.get("id"),
-		# 		"zoom_link": data.get("join_url"),
-		# 	}
-		# )
-		# webinar.insert(ignore_permissions=True)
-		# frappe.msgprint("Webinar imported successfully from Zoom.")
-		# return webinar.name
+		processed_datetime = convert_utc_to_timezone(
+			get_datetime(data.get("start_time")), data.get("timezone") or "Asia/Calcutta"
+		)
+
+		webinar = frappe.get_doc(
+			{
+				"doctype": "Zoom Webinar",
+				"title": data.get("topic"),
+				"agenda": data.get("agenda") or data.get("topic"),
+				"date": processed_datetime.date() if processed_datetime else None,
+				"start_time": processed_datetime.time() if processed_datetime else None,
+				"timezone": data.get("timezone"),
+				"duration": data.get("duration", 60) * 60,  # Convert minutes to seconds
+				"zoom_webinar_id": data.get("id"),
+				"zoom_link": data.get("join_url"),
+			}
+		)
+		webinar.insert(ignore_permissions=True)
+		frappe.msgprint("Webinar imported successfully from Zoom.")
 	else:
 		frappe.throw(f"Failed to fetch webinar details: {response.text}")
