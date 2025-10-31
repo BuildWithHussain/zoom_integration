@@ -152,12 +152,6 @@ class ZoomWebinar(Document):
 	@frappe.whitelist()
 	def sync_attendance(self):
 		try:
-			frappe.publish_progress(
-				percent=5,
-				title="Syncing Attendance",
-				description="Fetching attendance details from Zoom..."
-			)
-
 			details = get_webinar_attendance_details(self.name)
 
 			if not details:
@@ -165,7 +159,7 @@ class ZoomWebinar(Document):
 				return
 
 			frappe.publish_progress(
-				percent=10,
+				percent=5,
 				title="Creating Attendance Records",
 				description=f"Creating records for {len(details)} unique attendees..."
 			)
@@ -195,7 +189,6 @@ class ZoomWebinar(Document):
 							}
 						)
 						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
-						doc.reload()
 						processed_count += 1
 					except Exception as e:
 						frappe.log_error(
@@ -278,6 +271,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 					# Update total records from first page
 					if page_count == 1:
 						total_records = data.get("total_records", 0)
+						# return total_records
 
 					# Check if there are more pages
 					next_page_token = data.get("next_page_token")
@@ -295,11 +289,6 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 				elif response.status_code == 429:  # Rate limit
 					retry_after = int(response.headers.get("Retry-After", 60))
-					frappe.publish_progress(
-						percent=min(95, (len(all_participants) / max(total_records, len(all_participants))) * 100),
-						title="Rate Limited",
-						description=f"Waiting {retry_after} seconds before retrying..."
-					)
 					time.sleep(retry_after)
 					retry_count += 1
 
@@ -321,12 +310,6 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 		# Small delay between pages to be respectful to the API
 		time.sleep(0.5)
-
-	frappe.publish_progress(
-		percent=95,
-		title="Processing Attendance Data",
-		description=f"Processing {len(all_participants)} participant records..."
-	)
 
 	# process the attendance to sum the duration based on user email
 	# since the same user can join multiple times, we will sum their durations
@@ -356,7 +339,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 	frappe.publish_progress(
 		percent=100,
-		title="Attendance Data Ready",
+		title="Fetching Attendance Data",
 		description=f"Successfully processed {len(attendance_details)} unique attendees from {len(all_participants)} total records"
 	)
 

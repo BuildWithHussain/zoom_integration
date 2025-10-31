@@ -1,16 +1,16 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "prompt",
+ "autoname": "hash",
  "creation": "2025-10-15 12:37:04.789164",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "webinar",
-  "user_email",
-  "column_break_bwzj",
-  "registration",
   "total_duration",
+  "column_break_bwzj",
+  "user_email",
+  "registration",
   "section_break_20sm",
   "amended_from"
  ],
@@ -35,18 +35,21 @@
    "in_list_view": 1,
    "label": "Webinar",
    "options": "Zoom Webinar",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "registration",
    "fieldtype": "Link",
    "label": "Registration",
-   "options": "Zoom Webinar Registration"
+   "options": "Zoom Webinar Registration",
+   "search_index": 1
   },
   {
    "fieldname": "total_duration",
    "fieldtype": "Duration",
    "hide_days": 1,
+   "in_list_view": 1,
    "label": "Total Duration",
    "reqd": 1
   },
@@ -66,11 +69,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-15 12:51:07.402828",
+ "modified": "2025-10-31 12:55:58.070667",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Attendance Record",
- "naming_rule": "Set by user",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
