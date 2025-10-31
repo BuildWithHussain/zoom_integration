@@ -2,15 +2,17 @@
 # For license information, please see license.txt
 
 import json
+import time
 
 import frappe
 import requests
 from frappe.model.document import Document
 from frappe.utils import cint, format_datetime
+from frappe.utils.data import convert_utc_to_timezone, get_datetime
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
 
-from frappe.utils.data import convert_utc_to_timezone, get_datetime
+ATTENDANCE_SYNC_BATCH_SIZE = 300  # Zoom API allows max 300 per page
 
 class ZoomWebinar(Document):
 	# begin: auto-generated types
@@ -149,71 +151,216 @@ class ZoomWebinar(Document):
 
 	@frappe.whitelist()
 	def sync_attendance(self):
-		details = get_webinar_attendance_details(self.name)
-
-		for attendance in details:
-			registration = frappe.db.get_value(
-				"Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name"
+		try:
+			frappe.publish_progress(
+				percent=5,
+				title="Syncing Attendance",
+				description="Fetching attendance details from Zoom..."
 			)
 
-			frappe.get_doc(
-				{
-					"doctype": "Zoom Webinar Attendance Record",
-					"registration": registration,
-					"webinar": self.name,
-					"user_email": attendance.get("user_email"),
-					"name": attendance.get("name"),
-					"total_duration": attendance.get("total_duration"),
-				}
-			).insert(ignore_permissions=True, ignore_if_duplicate=True).submit()
+			details = get_webinar_attendance_details(self.name)
 
-		self.attendance_synced = 1
-		self.save()
+			if not details:
+				frappe.msgprint("No attendance records found for this webinar.")
+				return
 
+			frappe.publish_progress(
+				percent=10,
+				title="Creating Attendance Records",
+				description=f"Creating records for {len(details)} unique attendees..."
+			)
 
-def get_webinar_attendance_details(webinar_id: str, limit: int = 1000):
-	url = f"{ZOOM_API_BASE_PATH}/past_webinars/{webinar_id}/participants?page_size={limit}"
+			# Process in batches to avoid memory issues
+			batch_size = ATTENDANCE_SYNC_BATCH_SIZE
+			processed_count = 0
+
+			for i in range(0, len(details), batch_size):
+				batch = details[i:i + batch_size]
+
+				for attendance in batch:
+					registration = frappe.db.get_value(
+						"Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name"
+					)
+
+					try:
+						doc = frappe.get_doc(
+							{
+								"doctype": "Zoom Webinar Attendance Record",
+								"registration": registration,
+								"webinar": self.name,
+								"user_email": attendance.get("user_email"),
+								"name": attendance.get("name"),
+								"total_duration": attendance.get("total_duration"),
+								"docstatus": 1
+							}
+						)
+						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+						doc.reload()
+						processed_count += 1
+					except Exception as e:
+						frappe.log_error(
+							message=f"Failed to create attendance record for {attendance.get('user_email')}: {e!s}",
+							title="Attendance Sync Error"
+						)
+						continue
+
+				# Update progress after each batch
+				progress = 10 + ((processed_count / len(details)) * 85)
+				frappe.publish_progress(
+					percent=progress,
+					title="Creating Attendance Records",
+					description=f"Processed {processed_count} of {len(details)} attendees..."
+				)
+
+				# Commit batch to avoid long transactions
+				frappe.db.commit()
+
+			self.attendance_synced = 1
+			self.save()
+
+			frappe.publish_progress(
+				percent=100,
+				title="Creating Attendance Records",
+				description=f"Successfully synced {processed_count} of {len(details)} attendees!"
+			)
+
+			if processed_count < len(details):
+				frappe.msgprint(
+					f"Synced {processed_count} out of {len(details)} attendees. "
+					f"{len(details) - processed_count} records had errors and were skipped. "
+					"Check the Error Log for details."
+				)
+			else:
+				frappe.msgprint(f"Successfully synced all {processed_count} attendees!")
+
+		except Exception as e:
+			frappe.log_error(
+				message=f"Attendance sync failed for webinar {self.name}: {e!s}",
+				title="Attendance Sync Failed"
+			)
+			frappe.throw(f"Failed to sync attendance: {e!s}")
+
+	@frappe.whitelist()
+	def sync_attendance_in_background(self):
+		frappe.enqueue_doc(
+			self.doctype,
+			self.name,
+			"sync_attendance",
+			queue="long",
+		)
+
+def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC_BATCH_SIZE):
 	headers = get_authenticated_headers_for_zoom()
-	response = requests.get(url, headers=headers)
+	all_participants = []
+	next_page_token = None
+	total_records = 0
+	page_count = 0
+	max_retries = 3
 
-	if response.status_code == 200:
-		data = response.json()
-		attendance_details = data.get("participants", [])
+	while True:
+		page_count += 1
+		retry_count = 0
 
-		if data.get("total_records", 0) > 1000:
-			frappe.throw(
-				"Attendance details exceed the limit of 300 participants. Pagination not implemented yet."
-			)
+		# Build URL with pagination parameters
+		url = f"{ZOOM_API_BASE_PATH}/past_webinars/{webinar_id}/participants?page_size={limit}"
+		if next_page_token:
+			url += f"&next_page_token={next_page_token}"
 
-		# process the attendance to sum the duration based on user email
-		# since the same user can join multiple times, we will sum their durations
-		attendance_summary = {}
-		for participant in attendance_details:
-			email = participant.get("user_email")
-			if email:
-				if email not in attendance_summary:
-					attendance_summary[email] = {
-						"name": participant.get("name"),
-						"total_duration": 0,
-						"registrant_id": participant.get("registrant_id"),
-					}
-				attendance_summary[email]["total_duration"] += participant.get("duration", 0)
+		while retry_count < max_retries:
+			try:
+				response = requests.get(url, headers=headers, timeout=30)
 
-		# Convert the summary to a list of dictionaries
-		attendance_details = [
-			{
-				"user_email": email,
-				"name": details["name"],
-				"total_duration": details["total_duration"],
-			}
-			for email, details in attendance_summary.items()
-		]
-		# Sort by total duration in descending order
-		attendance_details.sort(key=lambda x: x["total_duration"], reverse=True)
+				if response.status_code == 200:
+					data = response.json()
+					participants = data.get("participants", [])
+					all_participants.extend(participants)
 
-		return attendance_details
-	else:
-		frappe.throw(f"Failed to fetch webinar attendance details: {response.text}")
+					# Update total records from first page
+					if page_count == 1:
+						total_records = data.get("total_records", 0)
+
+					# Check if there are more pages
+					next_page_token = data.get("next_page_token")
+
+					# Update progress
+					if total_records > 0:
+						progress = min(95, (len(all_participants) / total_records) * 100)
+						frappe.publish_progress(
+							percent=progress,
+							title="Fetching Attendance Data",
+							description=f"Fetched {len(all_participants)} of {total_records} participants (Page {page_count})..."
+						)
+
+					break  # Success, exit retry loop
+
+				elif response.status_code == 429:  # Rate limit
+					retry_after = int(response.headers.get("Retry-After", 60))
+					frappe.publish_progress(
+						percent=min(95, (len(all_participants) / max(total_records, len(all_participants))) * 100),
+						title="Rate Limited",
+						description=f"Waiting {retry_after} seconds before retrying..."
+					)
+					time.sleep(retry_after)
+					retry_count += 1
+
+				else:
+					if retry_count == max_retries - 1:
+						frappe.throw(f"Failed to fetch webinar attendance details after {max_retries} attempts: {response.text}")
+					retry_count += 1
+					time.sleep(2 ** retry_count)  # Exponential backoff
+
+			except requests.exceptions.RequestException as e:
+				if retry_count == max_retries - 1:
+					frappe.throw(f"Network error while fetching attendance details: {e!s}")
+				retry_count += 1
+				time.sleep(2 ** retry_count)
+
+		# If no more pages, break the main loop
+		if not next_page_token:
+			break
+
+		# Small delay between pages to be respectful to the API
+		time.sleep(0.5)
+
+	frappe.publish_progress(
+		percent=95,
+		title="Processing Attendance Data",
+		description=f"Processing {len(all_participants)} participant records..."
+	)
+
+	# process the attendance to sum the duration based on user email
+	# since the same user can join multiple times, we will sum their durations
+	attendance_summary = {}
+	for participant in all_participants:
+		email = participant.get("user_email")
+		if email:
+			if email not in attendance_summary:
+				attendance_summary[email] = {
+					"name": participant.get("name"),
+					"total_duration": 0,
+					"registrant_id": participant.get("registrant_id"),
+				}
+			attendance_summary[email]["total_duration"] += participant.get("duration", 0)
+
+	# Convert the summary to a list of dictionaries
+	attendance_details = [
+		{
+			"user_email": email,
+			"name": details["name"],
+			"total_duration": details["total_duration"],
+		}
+		for email, details in attendance_summary.items()
+	]
+	# Sort by total duration in descending order
+	attendance_details.sort(key=lambda x: x["total_duration"], reverse=True)
+
+	frappe.publish_progress(
+		percent=100,
+		title="Attendance Data Ready",
+		description=f"Successfully processed {len(attendance_details)} unique attendees from {len(all_participants)} total records"
+	)
+
+	return attendance_details
 
 
 @frappe.whitelist()
