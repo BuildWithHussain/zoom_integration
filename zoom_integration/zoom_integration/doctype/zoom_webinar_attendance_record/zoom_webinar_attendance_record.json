@@ -8,6 +8,7 @@
  "field_order": [
   "webinar",
   "total_duration",
+  "full_name",
   "column_break_bwzj",
   "user_email",
   "registration",
@@ -61,7 +62,13 @@
    "fieldname": "user_email",
    "fieldtype": "Data",
    "label": "User Email",
-   "options": "Email"
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name"
   }
  ],
  "grid_page_length": 50,
@@ -69,7 +76,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-31 12:55:58.070667",
+ "modified": "2025-10-31 13:53:40.209620",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Attendance Record",

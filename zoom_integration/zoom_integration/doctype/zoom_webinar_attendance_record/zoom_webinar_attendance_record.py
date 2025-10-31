@@ -15,9 +15,10 @@ class ZoomWebinarAttendanceRecord(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
+		full_name: DF.Data | None
 		registration: DF.Link | None
 		total_duration: DF.Duration
-		user_email: DF.Data | None
+		user_email: DF.Data
 		webinar: DF.Link
 	# end: auto-generated types
 

@@ -183,7 +183,7 @@ class ZoomWebinar(Document):
 								"registration": registration,
 								"webinar": self.name,
 								"user_email": attendance.get("user_email"),
-								"name": attendance.get("name"),
+								"full_name": attendance.get("name"),
 								"total_duration": attendance.get("total_duration"),
 								"docstatus": 1
 							}
