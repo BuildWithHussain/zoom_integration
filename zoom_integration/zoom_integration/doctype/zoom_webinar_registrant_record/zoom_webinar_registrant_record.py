@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class ZoomWebinarAttendanceRecord(Document):
+class ZoomWebinarRegistrantRecord(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -13,14 +13,16 @@ class ZoomWebinarAttendanceRecord(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
+		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import ZoomWebinarAdditionalParam
 
 		amended_from: DF.Link | None
-		full_name: DF.Data | None
+		custom_question: DF.Table[ZoomWebinarAdditionalParam]
+		email: DF.Data | None
+		first_name: DF.Data | None
+		last_name: DF.Data | None
+		phone: DF.Data | None
 		registrant_id: DF.Data | None
-		registration: DF.Link | None
-		total_duration: DF.Duration
-		user_email: DF.Data
-		webinar: DF.Link
+		webinar: DF.Link | None
 	# end: auto-generated types
 
 	pass

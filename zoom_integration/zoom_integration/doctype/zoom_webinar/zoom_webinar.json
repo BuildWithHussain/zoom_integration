@@ -144,10 +144,14 @@
   {
    "link_doctype": "Zoom Webinar Attendance Record",
    "link_fieldname": "webinar"
+  },
+  {
+   "link_doctype": "Zoom Webinar Registrant Record",
+   "link_fieldname": "webinar"
   }
  ],
- "modified": "2025-10-27 16:51:55.083180",
- "modified_by": "hussain@frappe.io",
+ "modified": "2025-11-16 18:31:16.335445",
+ "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",
  "naming_rule": "By fieldname",

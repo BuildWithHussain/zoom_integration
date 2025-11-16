@@ -194,7 +194,8 @@ class ZoomWebinar(Document):
 								"user_email": attendance.get("user_email"),
 								"full_name": attendance.get("name"),
 								"total_duration": attendance.get("total_duration"),
-								"docstatus": 1,
+								"registrant_id":attendance.get("registrant_id"),
+								"docstatus": 1,				
 							}
 						)
 						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
@@ -243,6 +244,96 @@ class ZoomWebinar(Document):
 			frappe.throw(f"Failed to sync attendance: {e!s}")
 
 	@frappe.whitelist()
+	def get_registrants(self):
+		try:
+			details = get_webinar_registrant_details(self.name)
+
+			if not details:
+				frappe.msgprint("No registration records found for this webinar.")
+				return
+
+			frappe.publish_progress(
+				percent=5,
+				title="Creating Registrant Records",
+				description=f"Creating records for {len(details)} unique registrants...",
+			)
+
+			# Process in batches to avoid memory issues
+			batch_size = ATTENDANCE_SYNC_BATCH_SIZE
+			processed_count = 0
+
+			for i in range(0, len(details), batch_size):
+				batch = details[i : i + batch_size]
+
+				for registrant in batch:
+
+					try:
+						doc = frappe.get_doc(
+							{
+								"doctype": "Zoom Webinar Registrant Record",
+								"registrant_id": registrant.get("id"),
+								"webinar": self.name,
+								"email": registrant.get("email"),
+								"first_name": registrant.get("first_name"),
+								"last_name": registrant.get("last_name"),
+								"phone":registrant.get("phone"),
+								"docstatus":1
+							}
+						)
+						for question in registrant.get("custom_questions"):
+							if question.get("title"):
+								doc.append(
+									"custom_question",
+								{			"key":question.get("title","N/A"),
+									"value":question.get("value","N/A")}
+								)
+						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+
+						
+						processed_count += 1
+					except Exception as e:
+						frappe.log_error(
+							message=f"Failed to create registrant record for {registrant.get('email')}: {e!s}",
+							title="Registrant Sync Error",
+						)
+						continue
+
+				# Update progress after each batch
+				progress = 10 + ((processed_count / len(details)) * 85)
+				frappe.publish_progress(
+					percent=progress,
+					title="Creating Registrant Records",
+					description=f"Processed {processed_count} of {len(details)} registrants...",
+				)
+
+				# Commit batch to avoid long transactions
+				frappe.db.commit()
+
+			self.attendance_synced = 1
+			self.save()
+
+			frappe.publish_progress(
+				percent=100,
+				title="Creating Registrant Records",
+				description=f"Successfully synced {processed_count} of {len(details)} registrants!",
+			)
+
+			if processed_count < len(details):
+				frappe.msgprint(
+					f"Synced {processed_count} out of {len(details)} registrants. "
+					f"{len(details) - processed_count} records had errors and were skipped. "
+					"Check the Error Log for details."
+				)
+			else:
+				frappe.msgprint(f"Successfully synced all {processed_count} registrants!")
+
+		except Exception as e:
+			frappe.log_error(
+				message=f"Registrant sync failed for webinar {self.name}: {e!s}",
+				title="Registrant Sync Failed",
+			)
+			frappe.throw(f"Failed to sync registrant: {e!s}")
+	@frappe.whitelist()
 	def sync_attendance_in_background(self):
 		frappe.enqueue_doc(
 			self.doctype,
@@ -250,6 +341,22 @@ class ZoomWebinar(Document):
 			"sync_attendance",
 			queue="long",
 		)
+		frappe.enqueue_doc(
+			self.doctype,
+			self.name,
+			"get_registrants",
+			queue="long",
+		)
+	@frappe.whitelist()
+	def sync_registration_in_background(self):
+
+		frappe.enqueue_doc(
+			self.doctype,
+			self.name,
+			"get_registrants",
+			queue="long",
+		)
+
 
 
 def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC_BATCH_SIZE):
@@ -343,6 +450,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 			"user_email": email,
 			"name": details["name"],
 			"total_duration": details["total_duration"],
+			"registrant_id":details["registrant_id"],
 		}
 		for email, details in attendance_summary.items()
 	]
@@ -356,6 +464,79 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 	)
 
 	return attendance_details
+
+def get_webinar_registrant_details(webinar_id: str, limit: int = ATTENDANCE_SYNC_BATCH_SIZE):
+	headers = get_authenticated_headers_for_zoom()
+	all_registrants = []
+	next_page_token = None
+	total_records = 0
+	page_count = 0
+	max_retries = 3
+
+	while True:
+		page_count += 1
+		retry_count = 0
+
+		# Build URL with pagination parameters
+		url = f"{ZOOM_API_BASE_PATH}/webinars/{webinar_id}/registrants?page_size={limit}"
+		if next_page_token:
+			url += f"&next_page_token={next_page_token}"
+
+		while retry_count < max_retries:
+			try:
+				response = requests.get(url, headers=headers, timeout=30)
+
+				if response.status_code == 200:
+					data = response.json()
+					registrants = data.get("registrants", [])
+					all_registrants.extend(registrants)
+					# Update total records from first page
+					if page_count == 1:
+						total_records = data.get("total_records", 0)
+						# return total_records
+
+					# Check if there are more pages
+					next_page_token = data.get("next_page_token")
+
+					# Update progress
+					if total_records > 0:
+						progress = min(95, (len(all_registrants) / total_records) * 100)
+						frappe.publish_progress(
+							percent=progress,
+							title="Fetching Registrant Data",
+							description=f"Fetched {len(all_registrants)} of {total_records} registrants (Page {page_count})...",
+						)
+
+					break  # Success, exit retry loop
+
+				elif response.status_code == 429:  # Rate limit
+					retry_after = int(response.headers.get("Retry-After", 60))
+					time.sleep(retry_after)
+					retry_count += 1
+
+				else:
+					if retry_count == max_retries - 1:
+						frappe.throw(
+							f"Failed to fetch webinar attendance details after {max_retries} attempts: {response.text}"
+						)
+					retry_count += 1
+					time.sleep(2**retry_count)  # Exponential backoff
+
+			except requests.exceptions.RequestException as e:
+				if retry_count == max_retries - 1:
+					frappe.throw(f"Network error while fetching attendance details: {e!s}")
+				retry_count += 1
+				time.sleep(2**retry_count)
+
+		# If no more pages, break the main loop
+		if not next_page_token:
+			break
+
+		# Small delay between pages to be respectful to the API
+		time.sleep(0.5)
+
+
+	return all_registrants
 
 
 @frappe.whitelist()
