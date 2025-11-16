@@ -6,6 +6,7 @@ import time
 
 import frappe
 import requests
+from frappe import _
 from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
 from frappe.utils import cint, format_datetime
@@ -77,7 +78,7 @@ class ZoomWebinar(Document):
 			data = response.json()
 			self.zoom_link = data.get("join_url")
 			self.zoom_webinar_id = data.get("id")
-			frappe.msgprint("Webinar created successfully on Zoom.")
+			frappe.msgprint(_("Webinar created successfully on Zoom."))
 			create_request_log(
 				data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
 			)
@@ -111,7 +112,7 @@ class ZoomWebinar(Document):
 
 		response = requests.patch(url, headers=headers, data=body)
 		if response.status_code == 204:
-			frappe.msgprint("Webinar updated successfully on Zoom.")
+			frappe.msgprint(_("Webinar updated successfully on Zoom."))
 		else:
 			frappe.throw("Failed to update webinar on Zoom: {0}".format(response.text))
 
@@ -172,7 +173,7 @@ class ZoomWebinar(Document):
 			details = get_webinar_attendance_details(self.name)
 
 			if not details:
-				frappe.msgprint("No attendance records found for this webinar.")
+				frappe.msgprint(_("No attendance records found for this webinar."))
 				return
 
 			frappe.publish_progress(
@@ -249,7 +250,7 @@ class ZoomWebinar(Document):
 				message=f"Attendance sync failed for webinar {self.name}: {e!s}",
 				title="Attendance Sync Failed",
 			)
-			frappe.throw(f"Failed to sync attendance: {e!s}")
+			frappe.throw(_(f"Failed to sync attendance: {e!s}"))
 
 	@frappe.whitelist()
 	def get_registrants(self):
@@ -257,7 +258,7 @@ class ZoomWebinar(Document):
 			details = get_webinar_registrant_details(self.name)
 
 			if not details:
-				frappe.msgprint("No registration records found for this webinar.")
+				frappe.msgprint(_("No registration records found for this webinar."))
 				return
 
 			frappe.publish_progress(
@@ -340,7 +341,7 @@ class ZoomWebinar(Document):
 				message=f"Registrant sync failed for webinar {self.name}: {e!s}",
 				title="Registrant Sync Failed",
 			)
-			frappe.throw(f"Failed to sync registrant: {e!s}")
+			frappe.throw(_(f"Failed to sync registrant: {e!s}"))
 
 	@frappe.whitelist()
 	def sync_attendance_in_background(self):
@@ -427,7 +428,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 			except requests.exceptions.RequestException as e:
 				if retry_count == max_retries - 1:
-					frappe.throw(f"Network error while fetching attendance details: {e!s}")
+					frappe.throw(_(f"Network error while fetching attendance details: {e!s}"))
 				retry_count += 1
 				time.sleep(2**retry_count)
 
@@ -533,7 +534,7 @@ def get_webinar_registrant_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 			except requests.exceptions.RequestException as e:
 				if retry_count == max_retries - 1:
-					frappe.throw(f"Network error while fetching attendance details: {e!s}")
+					frappe.throw(_(f"Network error while fetching attendance details: {e!s}"))
 				retry_count += 1
 				time.sleep(2**retry_count)
 
@@ -555,7 +556,7 @@ def import_existing_webinar(webinar_id: str):
 	# Check if the webinar already exists in the system
 	existing = frappe.db.get_value("Zoom Webinar", {"zoom_webinar_id": webinar_id})
 	if existing:
-		frappe.msgprint("Webinar already exists in the system.")
+		frappe.msgprint(_("Webinar already exists in the system."))
 		return existing
 
 	url = f"{ZOOM_API_BASE_PATH}/webinars/{webinar_id}"
@@ -582,6 +583,6 @@ def import_existing_webinar(webinar_id: str):
 			}
 		)
 		webinar.insert(ignore_permissions=True)
-		frappe.msgprint("Webinar imported successfully from Zoom.")
+		frappe.msgprint(_("Webinar imported successfully from Zoom."))
 	else:
-		frappe.throw(f"Failed to fetch webinar details: {response.text}")
+		frappe.throw(_(f"Failed to fetch webinar details: {response.text}"))
