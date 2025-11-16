@@ -43,5 +43,3 @@ def sync_templates_from_zoom():
 					}
 				)
 				doc.insert(ignore_permissions=True)
-
-

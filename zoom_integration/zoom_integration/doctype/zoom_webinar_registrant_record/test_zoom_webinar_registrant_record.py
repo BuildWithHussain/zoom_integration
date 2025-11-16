@@ -11,9 +11,9 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
-class IntegrationTestZoomWebinarTemplate(IntegrationTestCase):
+class IntegrationTestZoomWebinarRegistrantRecord(IntegrationTestCase):
 	"""
-	Integration tests for ZoomWebinarTemplate.
+	Integration tests for ZoomWebinarRegistrantRecord.
 	Use this class for testing interactions between multiple components.
 	"""
 

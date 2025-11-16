@@ -12,6 +12,7 @@
   "column_break_bwzj",
   "user_email",
   "registration",
+  "registrant_id",
   "section_break_20sm",
   "amended_from"
  ],
@@ -69,6 +70,11 @@
    "fieldname": "full_name",
    "fieldtype": "Data",
    "label": "Full Name"
+  },
+  {
+   "fieldname": "registrant_id",
+   "fieldtype": "Data",
+   "label": "Registrant ID"
   }
  ],
  "grid_page_length": 50,
@@ -76,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-31 13:53:40.209620",
+ "modified": "2025-11-16 18:57:04.451616",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Attendance Record",
