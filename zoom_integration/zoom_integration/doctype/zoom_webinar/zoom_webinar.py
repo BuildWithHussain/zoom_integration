@@ -6,10 +6,10 @@ import time
 
 import frappe
 import requests
+from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
 from frappe.utils import cint, format_datetime
 from frappe.utils.data import convert_utc_to_timezone, get_datetime
-from frappe.integrations.utils import create_request_log
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
 
@@ -83,7 +83,11 @@ class ZoomWebinar(Document):
 			)
 		else:
 			create_request_log(
-				response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
+				response.text,
+				is_remote_request=1,
+				service_name="Zoom",
+				request_headers=headers,
+				status="Failed",
 			)
 			frappe.throw("Failed to create webinar on Zoom: {0}".format(response.text))
 
@@ -154,7 +158,11 @@ class ZoomWebinar(Document):
 			return data
 		else:
 			create_request_log(
-				response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
+				response.text,
+				is_remote_request=1,
+				service_name="Zoom",
+				request_headers=headers,
+				status="Failed",
 			)
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
 
@@ -194,8 +202,8 @@ class ZoomWebinar(Document):
 								"user_email": attendance.get("user_email"),
 								"full_name": attendance.get("name"),
 								"total_duration": attendance.get("total_duration"),
-								"registrant_id":attendance.get("registrant_id"),
-								"docstatus": 1,				
+								"registrant_id": attendance.get("registrant_id"),
+								"docstatus": 1,
 							}
 						)
 						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
@@ -266,7 +274,6 @@ class ZoomWebinar(Document):
 				batch = details[i : i + batch_size]
 
 				for registrant in batch:
-
 					try:
 						doc = frappe.get_doc(
 							{
@@ -276,20 +283,21 @@ class ZoomWebinar(Document):
 								"email": registrant.get("email"),
 								"first_name": registrant.get("first_name"),
 								"last_name": registrant.get("last_name"),
-								"phone":registrant.get("phone"),
-								"docstatus":1
+								"phone": registrant.get("phone"),
+								"docstatus": 1,
 							}
 						)
 						for question in registrant.get("custom_questions"):
 							if question.get("title"):
 								doc.append(
 									"custom_question",
-								{			"key":question.get("title","N/A"),
-									"value":question.get("value","N/A")}
+									{
+										"key": question.get("title", "N/A"),
+										"value": question.get("value", "N/A"),
+									},
 								)
 						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
-						
 						processed_count += 1
 					except Exception as e:
 						frappe.log_error(
@@ -333,6 +341,7 @@ class ZoomWebinar(Document):
 				title="Registrant Sync Failed",
 			)
 			frappe.throw(f"Failed to sync registrant: {e!s}")
+
 	@frappe.whitelist()
 	def sync_attendance_in_background(self):
 		frappe.enqueue_doc(
@@ -347,16 +356,15 @@ class ZoomWebinar(Document):
 			"get_registrants",
 			queue="long",
 		)
+
 	@frappe.whitelist()
 	def sync_registration_in_background(self):
-
 		frappe.enqueue_doc(
 			self.doctype,
 			self.name,
 			"get_registrants",
 			queue="long",
 		)
-
 
 
 def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC_BATCH_SIZE):
@@ -450,7 +458,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 			"user_email": email,
 			"name": details["name"],
 			"total_duration": details["total_duration"],
-			"registrant_id":details["registrant_id"],
+			"registrant_id": details["registrant_id"],
 		}
 		for email, details in attendance_summary.items()
 	]
@@ -464,6 +472,7 @@ def get_webinar_attendance_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 	)
 
 	return attendance_details
+
 
 def get_webinar_registrant_details(webinar_id: str, limit: int = ATTENDANCE_SYNC_BATCH_SIZE):
 	headers = get_authenticated_headers_for_zoom()
@@ -534,7 +543,6 @@ def get_webinar_registrant_details(webinar_id: str, limit: int = ATTENDANCE_SYNC
 
 		# Small delay between pages to be respectful to the API
 		time.sleep(0.5)
-
 
 	return all_registrants
 

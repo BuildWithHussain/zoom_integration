@@ -13,7 +13,10 @@ class ZoomWebinarRegistration(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
-		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import ZoomWebinarAdditionalParam
+
+		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import (
+			ZoomWebinarAdditionalParam,
+		)
 
 		additional_params: DF.Table[ZoomWebinarAdditionalParam]
 		amended_from: DF.Link | None
@@ -30,15 +33,12 @@ class ZoomWebinarRegistration(Document):
 		if self.user == "Guest":
 			frappe.throw("Guest user cannot register for webinar")
 
-
 	def before_submit(self):
 		user_doc = frappe.get_cached_doc("User", self.user)
 
 		additional_params = {}
 		if self.additional_params:
-			additional_params = {
-				param.key: param.value for param in self.additional_params
-			}
+			additional_params = {param.key: param.value for param in self.additional_params}
 
 		registration = frappe.get_cached_doc("Zoom Webinar", self.webinar).add_registrant(
 			user_doc.email, user_doc.first_name, user_doc.last_name, additional_params

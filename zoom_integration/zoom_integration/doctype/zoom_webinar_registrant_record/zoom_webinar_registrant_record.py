@@ -13,7 +13,10 @@ class ZoomWebinarRegistrantRecord(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
-		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import ZoomWebinarAdditionalParam
+
+		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import (
+			ZoomWebinarAdditionalParam,
+		)
 
 		amended_from: DF.Link | None
 		custom_question: DF.Table[ZoomWebinarAdditionalParam]

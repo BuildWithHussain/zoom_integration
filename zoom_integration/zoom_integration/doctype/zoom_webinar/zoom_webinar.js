@@ -13,20 +13,20 @@ frappe.ui.form.on("Zoom Webinar", {
 					frappe.show_alert({
 						message: __("Attendance sync has been started in the background..."),
 						indicator: "green",
-					})
+					});
 				});
 			});
 			frm.add_custom_button(__("Sync Registrations"), () => {
-			frm.call({
-				method: "sync_registration_in_background",
-				doc: frm.doc,
-			}).then(() => {
-				frappe.show_alert({
-					message: __("Registration sync has been started in the background..."),
-					indicator: "green",
-				})
+				frm.call({
+					method: "sync_registration_in_background",
+					doc: frm.doc,
+				}).then(() => {
+					frappe.show_alert({
+						message: __("Registration sync has been started in the background..."),
+						indicator: "green",
+					});
+				});
 			});
-		});
 		}
 	},
 });
