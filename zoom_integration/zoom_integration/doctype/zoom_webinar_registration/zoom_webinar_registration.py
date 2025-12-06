@@ -13,35 +13,38 @@ class ZoomWebinarRegistration(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
-
-		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import (
-			ZoomWebinarAdditionalParam,
-		)
+		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import ZoomWebinarAdditionalParam
 
 		additional_params: DF.Table[ZoomWebinarAdditionalParam]
 		amended_from: DF.Link | None
+		email: DF.Data | None
+		first_name: DF.Data | None
 		join_url: DF.Data | None
+		last_name: DF.Data | None
 		registrant_id: DF.Data | None
 		user: DF.Link | None
 		webinar: DF.Link
 	# end: auto-generated types
 
 	def before_insert(self):
-		if not self.user:
+		if not (self.user or self.email):
 			self.user = frappe.session.user
 
 		if self.user == "Guest":
 			frappe.throw("Guest user cannot register for webinar")
+		elif self.user and not self.email:
+			user_doc = frappe.get_cached_doc("User", self.user)
+			self.email = user_doc.email
+			self.first_name = user_doc.first_name
+			self.last_name = user_doc.last_name
 
 	def before_submit(self):
-		user_doc = frappe.get_cached_doc("User", self.user)
-
 		additional_params = {}
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
 
 		registration = frappe.get_cached_doc("Zoom Webinar", self.webinar).add_registrant(
-			user_doc.email, user_doc.first_name, user_doc.last_name, additional_params
+			self.email, self.first_name, self.last_name, additional_params
 		)
 
 		self.join_url = registration.get("join_url")
