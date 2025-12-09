@@ -22,6 +22,7 @@ class ZoomWebinarRegistration(Document):
 		join_url: DF.Data | None
 		last_name: DF.Data | None
 		registrant_id: DF.Data | None
+		synced_from_zoom: DF.Check
 		user: DF.Link | None
 		webinar: DF.Link
 	# end: auto-generated types
@@ -39,6 +40,10 @@ class ZoomWebinarRegistration(Document):
 			self.last_name = user_doc.last_name
 
 	def before_submit(self):
+		if self.synced_from_zoom:
+			# this was already synced from zoom, no need to register again
+			return
+
 		additional_params = {}
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
