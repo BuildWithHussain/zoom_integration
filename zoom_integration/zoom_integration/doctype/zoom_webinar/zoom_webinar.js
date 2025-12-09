@@ -9,6 +9,8 @@ frappe.ui.form.on("Zoom Webinar", {
 				frm.call({
 					method: "sync_attendance_in_background",
 					doc: frm.doc,
+					freeze: true,
+					freeze_message: __("Starting attendance sync..."),
 				}).then(() => {
 					frappe.show_alert({
 						message: __("Attendance sync has been started in the background..."),
