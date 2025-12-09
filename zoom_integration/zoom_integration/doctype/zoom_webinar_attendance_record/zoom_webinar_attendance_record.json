@@ -74,7 +74,8 @@
   {
    "fieldname": "registrant_id",
    "fieldtype": "Data",
-   "label": "Registrant ID"
+   "label": "Registrant ID",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
@@ -82,7 +83,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-16 18:57:04.451616",
+ "modified": "2025-12-09 16:48:44.397521",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Attendance Record",
