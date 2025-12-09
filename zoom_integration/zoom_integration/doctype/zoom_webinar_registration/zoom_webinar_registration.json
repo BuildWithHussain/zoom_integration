@@ -9,6 +9,12 @@
   "webinar",
   "column_break_baez",
   "user",
+  "synced_from_zoom",
+  "attendee_details_section",
+  "email",
+  "column_break_tmmm",
+  "first_name",
+  "last_name",
   "section_break_rdgw",
   "additional_params",
   "zoom_information_section",
@@ -73,7 +79,8 @@
    "fieldname": "registrant_id",
    "fieldtype": "Data",
    "label": "Registrant ID",
-   "read_only": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break_hzel",
@@ -88,13 +95,53 @@
    "fieldtype": "Table",
    "label": "Additional Params",
    "options": "Zoom Webinar Additional Param"
+  },
+  {
+   "fetch_from": "user.email",
+   "fetch_if_empty": 1,
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email",
+   "read_only_depends_on": "eval:doc.user"
+  },
+  {
+   "fieldname": "attendee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Attendee Details"
+  },
+  {
+   "fieldname": "column_break_tmmm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "user.first_name",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "read_only_depends_on": "eval:doc.user"
+  },
+  {
+   "fetch_from": "user.last_name",
+   "fetch_if_empty": 1,
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "read_only_depends_on": "eval:doc.user"
+  },
+  {
+   "default": "0",
+   "fieldname": "synced_from_zoom",
+   "fieldtype": "Check",
+   "label": "Synced from Zoom?"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-31 12:45:50.275215",
+ "modified": "2025-12-09 13:13:19.795660",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Registration",
