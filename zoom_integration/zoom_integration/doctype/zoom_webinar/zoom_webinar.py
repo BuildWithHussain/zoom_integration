@@ -280,6 +280,7 @@ class ZoomWebinar(Document):
 							{
 								"doctype": "Zoom Webinar Registration",
 								"registrant_id": registrant.get("id"),
+								"join_url": registrant.get("join_url"),
 								"webinar": self.name,
 								"email": registrant.get("email"),
 								"first_name": registrant.get("first_name"),
