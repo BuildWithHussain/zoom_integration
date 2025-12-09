@@ -253,7 +253,7 @@ class ZoomWebinar(Document):
 			frappe.throw(_(f"Failed to sync attendance: {e!s}"))
 
 	@frappe.whitelist()
-	def get_registrants(self):
+	def sync_registrations_from_zoom(self):
 		try:
 			details = get_webinar_registrant_details(self.name)
 
@@ -278,27 +278,36 @@ class ZoomWebinar(Document):
 					try:
 						doc = frappe.get_doc(
 							{
-								"doctype": "Zoom Webinar Registrant Record",
+								"doctype": "Zoom Webinar Registration",
 								"registrant_id": registrant.get("id"),
 								"webinar": self.name,
 								"email": registrant.get("email"),
 								"first_name": registrant.get("first_name"),
 								"last_name": registrant.get("last_name"),
-								"phone": registrant.get("phone"),
 								"docstatus": 1,
+								"synced_from_zoom": 1,
 							}
 						)
 						for question in registrant.get("custom_questions"):
 							if question.get("title"):
 								doc.append(
-									"custom_question",
+									"additional_params",
 									{
 										"key": question.get("title", "N/A"),
 										"value": question.get("value", "N/A"),
 									},
 								)
-						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
+						if registrant.get("phone"):
+							doc.append(
+								"additional_params",
+								{
+									"key": "Phone",
+									"value": registrant.get("phone"),
+								},
+							)
+
+						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 						processed_count += 1
 					except Exception as e:
 						frappe.log_error(
@@ -351,19 +360,13 @@ class ZoomWebinar(Document):
 			"sync_attendance",
 			queue="long",
 		)
-		frappe.enqueue_doc(
-			self.doctype,
-			self.name,
-			"get_registrants",
-			queue="long",
-		)
 
 	@frappe.whitelist()
-	def sync_registration_in_background(self):
+	def sync_registrations_in_background(self):
 		frappe.enqueue_doc(
 			self.doctype,
 			self.name,
-			"get_registrants",
+			"sync_registrations_from_zoom",
 			queue="long",
 		)
 

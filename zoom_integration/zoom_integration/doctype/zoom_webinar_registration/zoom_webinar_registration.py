@@ -31,6 +31,10 @@ class ZoomWebinarRegistration(Document):
 		if not (self.user or self.email):
 			self.user = frappe.session.user
 
+		if self.email:
+			user_exists = frappe.db.exists("User", {"email": self.email})
+			self.user = user_exists
+
 		if self.user == "Guest":
 			frappe.throw("Guest user cannot register for webinar")
 		elif self.user and not self.email:
