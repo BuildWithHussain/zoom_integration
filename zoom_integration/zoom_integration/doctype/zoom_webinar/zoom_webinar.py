@@ -191,7 +191,7 @@ class ZoomWebinar(Document):
 
 				for attendance in batch:
 					registration = frappe.db.get_value(
-						"Zoom Webinar Registration", {"user": attendance.get("user_email", "N/A")}, "name"
+						"Zoom Webinar Registration", {"email": attendance.get("user_email", "N/A")}, "name"
 					)
 
 					try:
