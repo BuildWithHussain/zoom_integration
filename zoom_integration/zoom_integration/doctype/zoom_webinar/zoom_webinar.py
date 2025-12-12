@@ -170,6 +170,14 @@ class ZoomWebinar(Document):
 	@frappe.whitelist()
 	def sync_attendance(self):
 		try:
+			frappe.publish_progress(
+				percent=0,
+				title="Syncing Registrations",
+				description="Fetching and syncing registration records first...",
+			)
+
+			self.sync_registrations_from_zoom()
+
 			details = get_webinar_attendance_details(self.name)
 
 			if not details:
