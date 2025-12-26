@@ -10,7 +10,11 @@ ZOOM_API_BASE_PATH = "https://api.zoom.us/v2"
 def authenticate():
 	zoom = frappe.get_single("Zoom Settings")
 
-	if not (zoom.client_id and zoom.get_password(fieldname="client_secret", raise_exception=False) and zoom.account_id):
+	if not (
+		zoom.client_id
+		and zoom.get_password(fieldname="client_secret", raise_exception=False)
+		and zoom.account_id
+	):
 		frappe.throw(
 			_("Please set Zoom Client ID, Client Secret and Account ID in Zoom Settings."),
 			title=_("Zoom Settings Incomplete"),

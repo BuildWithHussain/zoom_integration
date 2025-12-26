@@ -170,6 +170,8 @@ class ZoomWebinar(Document):
 	@frappe.whitelist()
 	def sync_attendance(self):
 		try:
+			self.sync_registrations_from_zoom()
+
 			details = get_webinar_attendance_details(self.name)
 
 			if not details:
