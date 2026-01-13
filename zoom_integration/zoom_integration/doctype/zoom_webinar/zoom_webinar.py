@@ -278,6 +278,14 @@ class ZoomWebinar(Document):
 
 				for registrant in batch:
 					try:
+						if frappe.db.exists(
+							"Zoom Webinar Registration",
+							{
+								"registrant_id": registrant.get("id"),
+								"webinar": self.name,
+							},
+						):
+							continue
 						doc = frappe.get_doc(
 							{
 								"doctype": "Zoom Webinar Registration",
