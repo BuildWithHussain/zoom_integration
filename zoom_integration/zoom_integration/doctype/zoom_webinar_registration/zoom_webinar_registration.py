@@ -24,6 +24,7 @@ class ZoomWebinarRegistration(Document):
 		first_name: DF.Data | None
 		join_url: DF.Data | None
 		last_name: DF.Data | None
+		non_otp: DF.Check
 		registrant_id: DF.Data | None
 		synced_from_zoom: DF.Check
 		user: DF.Link | None

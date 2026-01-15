@@ -10,6 +10,7 @@
   "column_break_baez",
   "user",
   "synced_from_zoom",
+  "non_otp",
   "attendee_details_section",
   "email",
   "column_break_tmmm",
@@ -135,13 +136,19 @@
    "fieldname": "synced_from_zoom",
    "fieldtype": "Check",
    "label": "Synced from Zoom?"
+  },
+  {
+   "default": "0",
+   "fieldname": "non_otp",
+   "fieldtype": "Check",
+   "label": "Non Otp"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-09 13:13:19.795660",
+ "modified": "2026-01-15 21:13:28.775846",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar Registration",
