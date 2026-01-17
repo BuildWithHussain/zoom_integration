@@ -20,12 +20,6 @@ def get_columns():
 			"width": 200,
 		},
 		{
-			"label": _("Synced from Zoom"),
-			"fieldname": "synced_from_zoom",
-			"fieldtype": "Check",
-			"width": 200,
-		},
-		{
 			"label": _("First Name"),
 			"fieldname": "first_name",
 			"fieldtype": "Data",
@@ -36,6 +30,30 @@ def get_columns():
 			"fieldname": "last_name",
 			"fieldtype": "Data",
 			"width": 180,
+		},
+		{
+			"label": _("Synced from Zoom"),
+			"fieldname": "synced_from_zoom",
+			"fieldtype": "Check",
+			"width": 200,
+		},
+		{
+			"label": _("Auto Registered"),
+			"fieldname": "custom_auto_registered",
+			"fieldtype": "Check",
+			"width": 200,
+		},
+		{
+			"label": _("Registrant ID"),
+			"fieldname": "registrant_id",
+			"fieldtype": "Data",
+			"width": 200,
+		},
+		{
+			"label": _("Join URL"),
+			"fieldname": "join_url",
+			"fieldtype": "Data",
+			"width": 200,
 		},
 		{
 			"label": _("UTM Source"),
@@ -80,7 +98,10 @@ def get_data(filters):
 			zwreg.user,
 			zwreg.first_name,
 			zwreg.last_name,
-			zwreg.synced_from_zoom
+			zwreg.synced_from_zoom,
+			zwreg.registrant_id,
+			zwreg.join_url,
+			zwreg.custom_auto_registered
 		FROM `tabZoom Webinar Registration` zwreg
 		WHERE zwreg.webinar = %(webinar)s
 		ORDER BY zwreg.user
