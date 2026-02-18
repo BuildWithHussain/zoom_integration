@@ -106,6 +106,9 @@ class ZoomWebinar(Document):
 
 		before_save = self.get_doc_before_save()
 
+		if not before_save:
+			return
+
 		current_start = get_time(self.get("start_time"))
 		previous_start = get_time(before_save.get("start_time"))
 		current_date = self.get("date")
