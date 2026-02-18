@@ -111,7 +111,6 @@ class ZoomWebinar(Document):
 		current_date = self.get("date")
 		previous_date = str(before_save.get("date"))
 
-		# breakpoint()
 		zoom_related_field_not_updated = (
 			self.title == before_save.title
 			and self.agenda == before_save.agenda
