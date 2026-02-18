@@ -10,7 +10,7 @@ from frappe import _
 from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
 from frappe.utils import cint, format_datetime
-from frappe.utils.data import convert_utc_to_timezone, get_datetime
+from frappe.utils.data import convert_utc_to_timezone, get_datetime, get_time
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
 
@@ -100,6 +100,27 @@ class ZoomWebinar(Document):
 	def update_webinar_on_zoom_if_applicable(self):
 		if self.flags.in_import or self.flags.in_migration:
 			return  # Skip updates during import or migration
+
+		if self.is_new():
+			return
+
+		before_save = self.get_doc_before_save()
+
+		current_start = get_time(self.get("start_time"))
+		previous_start = get_time(before_save.get("start_time"))
+		current_date = self.get("date")
+		previous_date = str(before_save.get("date"))
+
+		# breakpoint()
+		zoom_related_field_not_updated = (
+			self.title == before_save.title
+			and self.agenda == before_save.agenda
+			and self.duration == before_save.duration
+			and current_date == previous_date
+			and current_start == previous_start
+		)
+		if zoom_related_field_not_updated:
+			return
 
 		# For simplicity, we will only update the title and agenda in this example.
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
