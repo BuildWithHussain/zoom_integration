@@ -98,6 +98,9 @@ class ZoomWebinar(Document):
 		self.update_webinar_on_zoom_if_applicable()
 
 	def update_webinar_on_zoom_if_applicable(self):
+		if self.flags.in_import or self.flags.in_migration:
+			return  # Skip updates during import or migration
+
 		# For simplicity, we will only update the title and agenda in this example.
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
 		headers = get_authenticated_headers_for_zoom()
@@ -596,6 +599,7 @@ def import_existing_webinar(webinar_id: str):
 				"zoom_link": data.get("join_url"),
 			}
 		)
+		webinar.flags.in_import = True  # Set flag to skip Zoom API update in on_update
 		webinar.insert(ignore_permissions=True)
 		frappe.msgprint(_("Webinar imported successfully from Zoom."))
 	else:
