@@ -135,6 +135,12 @@ class ZoomWebinar(Document):
 			self.zoom_webinar_id = None
 			self.save()
 			frappe.msgprint(frappe._("Webinar deleted successfully from Zoom."))
+		elif response.json().get("code") == 3001:
+			frappe.msgprint(
+				frappe._(
+					"Webinar not found on Zoom (may have already been deleted). Clearing local reference."
+				)
+			)
 		else:
 			frappe.throw(frappe._(f"Failed to delete webinar: {response.text}"))
 
