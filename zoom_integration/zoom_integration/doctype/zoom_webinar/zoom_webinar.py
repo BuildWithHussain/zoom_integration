@@ -36,7 +36,9 @@ class ZoomWebinar(Document):
 		template: DF.Link | None
 		timezone: DF.Autocomplete | None
 		title: DF.Data
+		zoom_event_id: DF.Data | None
 		zoom_link: DF.Data | None
+		zoom_ticket_id: DF.Data | None
 		zoom_webinar_id: DF.Data | None
 	# end: auto-generated types
 
@@ -176,28 +178,81 @@ class ZoomWebinar(Document):
 		if not additional_params:
 			additional_params = {}
 
-		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
 		headers = get_authenticated_headers_for_zoom()
-		body = json.dumps(
-			{"email": email, "first_name": first_name, "last_name": last_name or "N/A", **additional_params}
-		)
 
-		response = requests.post(url, headers=headers, data=body)
-		if response.status_code == 201:
-			data = response.json()
-			create_request_log(
-				data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
+		# Webinar Plus
+		if self.zoom_event_id and self.zoom_ticket_id:
+			url = f"{ZOOM_API_BASE_PATH}/zoom_events/events/{self.zoom_event_id}/tickets"
+			body = json.dumps(
+				{
+					"tickets": [
+						{
+							"email": email,
+							"first_name": first_name,
+							"last_name": last_name or "N/A",
+							"ticket_type_id": self.zoom_ticket_id,
+							**additional_params,
+						}
+					]
+				}
 			)
-			return data
+			response = requests.post(url, headers=headers, data=body)
+			if response.status_code in (200, 201):
+				data = response.json()
+				ticket = data.get("tickets", [{}])[0]
+				create_request_log(
+					data,
+					is_remote_request=1,
+					service_name="Zoom",
+					request_headers=headers,
+					status="Completed",
+				)
+				return {
+					"registrant_id": ticket.get("ticket_id"),
+					"join_url": ticket.get("event_join_link"),
+					"email": ticket.get("email"),
+				}
+			else:
+				create_request_log(
+					response.text,
+					is_remote_request=1,
+					service_name="Zoom",
+					request_headers=headers,
+					status="Failed",
+				)
+				frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
+
+		# Normal Webinar
 		else:
-			create_request_log(
-				response.text,
-				is_remote_request=1,
-				service_name="Zoom",
-				request_headers=headers,
-				status="Failed",
+			url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
+			body = json.dumps(
+				{
+					"email": email,
+					"first_name": first_name,
+					"last_name": last_name or "N/A",
+					**additional_params,
+				}
 			)
-			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
+			response = requests.post(url, headers=headers, data=body)
+			if response.status_code == 201:
+				data = response.json()
+				create_request_log(
+					data,
+					is_remote_request=1,
+					service_name="Zoom",
+					request_headers=headers,
+					status="Completed",
+				)
+				return data
+			else:
+				create_request_log(
+					response.text,
+					is_remote_request=1,
+					service_name="Zoom",
+					request_headers=headers,
+					status="Failed",
+				)
+				frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
 
 	@frappe.whitelist()
 	def sync_attendance(self):
@@ -225,7 +280,9 @@ class ZoomWebinar(Document):
 
 				for attendance in batch:
 					registration = frappe.db.get_value(
-						"Zoom Webinar Registration", {"email": attendance.get("user_email", "N/A")}, "name"
+						"Zoom Webinar Registration",
+						{"email": attendance.get("user_email", "N/A")},
+						"name",
 					)
 
 					try:
