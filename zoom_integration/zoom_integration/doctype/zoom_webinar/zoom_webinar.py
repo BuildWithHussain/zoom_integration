@@ -55,7 +55,7 @@ class ZoomWebinar(Document):
 				"agenda": self.agenda or self.title,
 				"type": 5,  # Scheduled webinar
 				"duration": cint(self.duration / 60) if self.duration else 60,
-				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ssZ"),
+				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ss"),
 				"timezone": self.timezone or "Asia/Calcutta",
 				"settings": {
 					"host_video": True,
