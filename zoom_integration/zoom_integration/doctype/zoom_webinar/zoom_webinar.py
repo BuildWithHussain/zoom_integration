@@ -199,14 +199,23 @@ class ZoomWebinar(Document):
 		else:
 			url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
 			body = json.dumps(
-				{"email": email, "first_name": first_name, "last_name": last_name or "N/A", **additional_params}
+				{
+					"email": email,
+					"first_name": first_name,
+					"last_name": last_name or "N/A",
+					**additional_params,
+				}
 			)
 
 		response = requests.post(url, headers=headers, data=body)
 
 		if response.status_code not in (200, 201):
 			create_request_log(
-				response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
+				response.text,
+				is_remote_request=1,
+				service_name="Zoom",
+				request_headers=headers,
+				status="Failed",
 			)
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
 
