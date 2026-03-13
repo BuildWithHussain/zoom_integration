@@ -36,7 +36,9 @@ class ZoomWebinar(Document):
 		template: DF.Link | None
 		timezone: DF.Autocomplete | None
 		title: DF.Data
+		zoom_event_id: DF.Data | None
 		zoom_link: DF.Data | None
+		zoom_ticket_id: DF.Data | None
 		zoom_webinar_id: DF.Data | None
 	# end: auto-generated types
 
@@ -177,20 +179,38 @@ class ZoomWebinar(Document):
 		if not additional_params:
 			additional_params = {}
 
-		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
 		headers = get_authenticated_headers_for_zoom()
-		body = json.dumps(
-			{"email": email, "first_name": first_name, "last_name": last_name or "N/A", **additional_params}
-		)
+		is_webinar_plus = self.zoom_event_id and self.zoom_ticket_id
+
+		if is_webinar_plus:
+			url = f"{ZOOM_API_BASE_PATH}/zoom_events/events/{self.zoom_event_id}/tickets"
+			body = json.dumps(
+				{
+					"tickets": [
+						{
+							"email": email,
+							"first_name": first_name,
+							"last_name": last_name or "N/A",
+							"ticket_type_id": self.zoom_ticket_id,
+							**additional_params,
+						}
+					]
+				}
+			)
+		else:
+			url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}/registrants"
+			body = json.dumps(
+				{
+					"email": email,
+					"first_name": first_name,
+					"last_name": last_name or "N/A",
+					**additional_params,
+				}
+			)
 
 		response = requests.post(url, headers=headers, data=body)
-		if response.status_code == 201:
-			data = response.json()
-			create_request_log(
-				data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-			)
-			return data
-		else:
+
+		if response.status_code not in (200, 201):
 			create_request_log(
 				response.text,
 				is_remote_request=1,
@@ -199,6 +219,21 @@ class ZoomWebinar(Document):
 				status="Failed",
 			)
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
+
+		data = response.json()
+		create_request_log(
+			data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
+		)
+
+		if is_webinar_plus:
+			ticket = data.get("tickets", [{}])[0]
+			return {
+				"registrant_id": ticket.get("ticket_id"),
+				"join_url": ticket.get("event_join_link"),
+				"email": ticket.get("email"),
+			}
+
+		return data
 
 	@frappe.whitelist()
 	def sync_attendance(self):
@@ -226,7 +261,9 @@ class ZoomWebinar(Document):
 
 				for attendance in batch:
 					registration = frappe.db.get_value(
-						"Zoom Webinar Registration", {"email": attendance.get("user_email", "N/A")}, "name"
+						"Zoom Webinar Registration",
+						{"email": attendance.get("user_email", "N/A")},
+						"name",
 					)
 
 					try:

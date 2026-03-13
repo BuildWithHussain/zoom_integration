@@ -23,6 +23,10 @@
   "attendance_synced",
   "column_break_lihm",
   "zoom_webinar_id",
+  "zoom_webinar_plus_section",
+  "zoom_event_id",
+  "column_break_oxmt",
+  "zoom_ticket_id",
   "section_break_tuka",
   "description"
  ],
@@ -132,6 +136,25 @@
    "fieldname": "timezone",
    "fieldtype": "Autocomplete",
    "label": "Timezone"
+  },
+  {
+   "fieldname": "zoom_webinar_plus_section",
+   "fieldtype": "Section Break",
+   "label": "Zoom Webinar Plus"
+  },
+  {
+   "fieldname": "zoom_event_id",
+   "fieldtype": "Data",
+   "label": "Zoom Event ID"
+  },
+  {
+   "fieldname": "column_break_oxmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zoom_ticket_id",
+   "fieldtype": "Data",
+   "label": "Zoom Ticket ID"
   }
  ],
  "grid_page_length": 50,
@@ -146,7 +169,7 @@
    "link_fieldname": "webinar"
   }
  ],
- "modified": "2025-12-09 13:30:38.107775",
+ "modified": "2026-03-11 10:25:34.016507",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Webinar",
