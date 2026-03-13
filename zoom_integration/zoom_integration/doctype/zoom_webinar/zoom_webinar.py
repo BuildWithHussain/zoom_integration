@@ -118,13 +118,13 @@ class ZoomWebinar(Document):
 			self.title == before_save.title
 			and self.agenda == before_save.agenda
 			and self.duration == before_save.duration
+			and self.timezone == before_save.timezone
 			and current_date == previous_date
 			and current_start == previous_start
 		)
 		if zoom_related_field_not_updated:
 			return
 
-		# For simplicity, we will only update the title and agenda in this example.
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
 		headers = get_authenticated_headers_for_zoom()
 		body = json.dumps(
@@ -132,7 +132,8 @@ class ZoomWebinar(Document):
 				"topic": self.title,
 				"agenda": self.agenda or self.title,
 				"duration": cint(self.duration / 60) if self.duration else 60,
-				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ssZ"),
+				"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ss"),
+				"timezone": self.timezone or "Asia/Calcutta",
 			}
 		)
 
