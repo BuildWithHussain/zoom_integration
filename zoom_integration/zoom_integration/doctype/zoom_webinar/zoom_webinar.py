@@ -135,8 +135,11 @@ class ZoomWebinar(Document):
 			url = f"{ZOOM_API_BASE_PATH}/zoom_events/events/{self.zoom_event_id}"
 			body = json.dumps(
 				{
-					"title": self.title,
-					"description": self.description or self.agenda or self.title,
+					"topic": self.title,
+					"agenda": self.agenda or self.title,
+					"duration": cint(self.duration / 60) if self.duration else 60,
+					"start_time": format_datetime(f"{self.date} {self.start_time}", "yyyy-MM-ddTHH:mm:ss"),
+					"timezone": self.timezone or "Asia/Calcutta",
 				}
 			)
 		else:
