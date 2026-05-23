@@ -276,9 +276,19 @@ class ZoomWebinar(Document):
 				batch = details[i : i + batch_size]
 
 				for attendance in batch:
+					user_email = attendance.get("user_email")
+					if not user_email:
+						continue
+
+					if frappe.db.exists(
+						"Zoom Webinar Attendance Record",
+						{"webinar": self.name, "user_email": user_email},
+					):
+						continue
+
 					registration = frappe.db.get_value(
 						"Zoom Webinar Registration",
-						{"email": attendance.get("user_email", "N/A")},
+						{"email": user_email},
 						"name",
 					)
 
@@ -288,18 +298,18 @@ class ZoomWebinar(Document):
 								"doctype": "Zoom Webinar Attendance Record",
 								"registration": registration,
 								"webinar": self.name,
-								"user_email": attendance.get("user_email"),
+								"user_email": user_email,
 								"full_name": attendance.get("name"),
 								"total_duration": attendance.get("total_duration"),
 								"registrant_id": attendance.get("registrant_id"),
 								"docstatus": 1,
 							}
 						)
-						doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+						doc.insert(ignore_permissions=True)
 						processed_count += 1
 					except Exception as e:
 						frappe.log_error(
-							message=f"Failed to create attendance record for {attendance.get('user_email')}: {e!s}",
+							message=f"Failed to create attendance record for {user_email}: {e!s}",
 							title="Attendance Sync Error",
 						)
 						continue
@@ -423,9 +433,6 @@ class ZoomWebinar(Document):
 
 				# Commit batch to avoid long transactions
 				frappe.db.commit()
-
-			self.attendance_synced = 1
-			self.save()
 
 			frappe.publish_progress(
 				percent=100,
