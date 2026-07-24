@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "webinar",
+  "meeting",
   "total_duration",
   "full_name",
   "column_break_bwzj",
@@ -37,7 +38,13 @@
    "in_list_view": 1,
    "label": "Webinar",
    "options": "Zoom Webinar",
-   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "meeting",
+   "fieldtype": "Link",
+   "label": "Meeting",
+   "options": "Zoom Meeting",
    "search_index": 1
   },
   {
