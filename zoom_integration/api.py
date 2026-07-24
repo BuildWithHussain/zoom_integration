@@ -1,0 +1,113 @@
+import json
+
+import frappe
+import requests
+from frappe.integrations.utils import create_request_log
+
+from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
+
+DEFAULT_PAGE_SIZE = 300  # Zoom API allows max 300 per page
+
+
+def create_zoom_session(resource: str, body: dict) -> dict:
+	"""Create a meeting or webinar. `resource` is 'meetings' or 'webinars'."""
+	url = f"{ZOOM_API_BASE_PATH}/users/me/{resource}"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.post(url, headers=headers, data=json.dumps(body))
+
+	if response.status_code == 201:
+		data = response.json()
+		create_request_log(
+			data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
+		)
+		return data
+
+	create_request_log(
+		response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
+	)
+	frappe.throw(f"Failed to create {resource[:-1]} on Zoom: {response.text}")
+
+
+def update_zoom_session(resource: str, session_id: str, body: dict) -> None:
+	url = f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.patch(url, headers=headers, data=json.dumps(body))
+
+	if response.status_code != 204:
+		frappe.throw(f"Failed to update {resource[:-1]} on Zoom: {response.text}")
+
+
+def delete_zoom_session(resource: str, session_id: str) -> bool:
+	"""Returns True if deleted on Zoom, False if it was already gone (code 3001)."""
+	url = f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.delete(url, headers=headers)
+
+	if response.status_code == 204:
+		return True
+	if response.json().get("code") == 3001:
+		return False
+	frappe.throw(f"Failed to delete {resource[:-1]} on Zoom: {response.text}")
+
+
+def add_zoom_registrant(resource: str, session_id: str, body: dict) -> dict:
+	url = f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}/registrants"
+	headers = get_authenticated_headers_for_zoom()
+	response = requests.post(url, headers=headers, data=json.dumps(body))
+
+	if response.status_code not in (200, 201):
+		create_request_log(
+			response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
+		)
+		frappe.throw(f"Failed to add registrant on Zoom: {response.text}")
+
+	data = response.json()
+	create_request_log(
+		data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
+	)
+	return data
+
+
+def _paginate(url_builder, item_key: str, page_size: int) -> list[dict]:
+	"""Follow Zoom's next_page_token pagination and collect `item_key` items."""
+	headers = get_authenticated_headers_for_zoom()
+	items: list[dict] = []
+	next_page_token = None
+
+	while True:
+		url = url_builder(page_size)
+		if next_page_token:
+			url += f"&next_page_token={next_page_token}"
+
+		response = requests.get(url, headers=headers, timeout=30)
+		if response.status_code != 200:
+			frappe.throw(f"Failed to fetch {item_key} from Zoom: {response.text}")
+
+		data = response.json()
+		items.extend(data.get(item_key, []))
+		next_page_token = data.get("next_page_token")
+		if not next_page_token:
+			break
+
+	return items
+
+
+def get_zoom_registrants(resource: str, session_id: str, page_size: int = DEFAULT_PAGE_SIZE) -> list[dict]:
+	return _paginate(
+		lambda size: f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}/registrants?page_size={size}",
+		"registrants",
+		page_size,
+	)
+
+
+def get_zoom_participants(resource: str, session_uuid: str, page_size: int = DEFAULT_PAGE_SIZE) -> list[dict]:
+	# ponytail: single-encoding the UUID covers the common case; double-encode
+	# here if you hit meeting UUIDs that start with "/" or contain "//".
+	from urllib.parse import quote
+
+	encoded_uuid = quote(session_uuid, safe="")
+	return _paginate(
+		lambda size: f"{ZOOM_API_BASE_PATH}/past_{resource}/{encoded_uuid}/participants?page_size={size}",
+		"participants",
+		page_size,
+	)
