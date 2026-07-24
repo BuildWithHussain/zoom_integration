@@ -7,6 +7,8 @@
  "field_order": [
   "title",
   "agenda",
+  "column_break_narx",
+  "send_zoom_registration_email",
   "timings_section",
   "date",
   "column_break_time",
@@ -19,37 +21,136 @@
   "zoom_meeting_uuid",
   "column_break_details",
   "zoom_link",
-  "send_zoom_registration_email",
   "attendance_synced"
  ],
  "fields": [
-  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "reqd": 1, "in_list_view": 1},
-  {"fieldname": "agenda", "fieldtype": "Small Text", "label": "Agenda"},
-  {"fieldname": "timings_section", "fieldtype": "Section Break", "label": "Timings"},
-  {"fieldname": "date", "fieldtype": "Date", "label": "Date", "reqd": 1},
-  {"fieldname": "column_break_time", "fieldtype": "Column Break"},
-  {"fieldname": "start_time", "fieldtype": "Time", "label": "Start Time", "reqd": 1},
-  {"fieldname": "duration", "fieldtype": "Duration", "hide_days": 1, "label": "Duration"},
-  {"fieldname": "column_break_tz", "fieldtype": "Column Break"},
-  {"fieldname": "timezone", "fieldtype": "Autocomplete", "label": "Timezone"},
-  {"fieldname": "meeting_details_section", "fieldtype": "Section Break", "label": "Meeting Details"},
-  {"fieldname": "zoom_meeting_id", "fieldtype": "Data", "label": "Zoom Meeting ID", "read_only": 1},
-  {"fieldname": "zoom_meeting_uuid", "fieldtype": "Data", "label": "Zoom Meeting UUID", "read_only": 1},
-  {"fieldname": "column_break_details", "fieldtype": "Column Break"},
-  {"fieldname": "zoom_link", "fieldtype": "Data", "label": "Join URL", "read_only": 1},
-  {"fieldname": "send_zoom_registration_email", "fieldtype": "Check", "label": "Send Zoom Registration Email"},
-  {"fieldname": "attendance_synced", "fieldtype": "Check", "label": "Attendance Synced", "read_only": 1}
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agenda",
+   "fieldtype": "Small Text",
+   "label": "Agenda"
+  },
+  {
+   "fieldname": "timings_section",
+   "fieldtype": "Section Break",
+   "label": "Timings"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_time",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "hide_days": 1,
+   "label": "Duration"
+  },
+  {
+   "fieldname": "column_break_tz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "timezone",
+   "fieldtype": "Autocomplete",
+   "label": "Timezone"
+  },
+  {
+   "fieldname": "meeting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Meeting Details"
+  },
+  {
+   "fieldname": "zoom_meeting_id",
+   "fieldtype": "Data",
+   "label": "Zoom Meeting ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zoom_meeting_uuid",
+   "fieldtype": "Data",
+   "label": "Zoom Meeting UUID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zoom_link",
+   "fieldtype": "Data",
+   "label": "Zoon Join URL",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_zoom_registration_email",
+   "fieldtype": "Check",
+   "label": "Send Zoom Registration Email"
+  },
+  {
+   "default": "0",
+   "fieldname": "attendance_synced",
+   "fieldtype": "Check",
+   "label": "Attendance Synced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_narx",
+   "fieldtype": "Column Break"
+  }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-24 00:00:00",
+ "modified": "2026-07-24 18:07:28.488733",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Meeting",
  "owner": "Administrator",
  "permissions": [
-  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1}
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Zoom Manager",
+   "share": 1,
+   "write": 1
+  }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -29,7 +29,7 @@ class ZoomMeeting(Document):
 		agenda: DF.SmallText | None
 		attendance_synced: DF.Check
 		date: DF.Date
-		duration: DF.Duration
+		duration: DF.Duration | None
 		send_zoom_registration_email: DF.Check
 		start_time: DF.Time
 		timezone: DF.Autocomplete | None
