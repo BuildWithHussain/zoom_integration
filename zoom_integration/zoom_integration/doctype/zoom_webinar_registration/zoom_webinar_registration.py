@@ -24,6 +24,7 @@ class ZoomWebinarRegistration(Document):
 		first_name: DF.Data | None
 		join_url: DF.Data | None
 		last_name: DF.Data | None
+		meeting: DF.Link | None
 		registrant_id: DF.Data | None
 		synced_from_zoom: DF.Check
 		user: DF.Link | None
@@ -55,7 +56,14 @@ class ZoomWebinarRegistration(Document):
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
 
-		registration = frappe.get_cached_doc("Zoom Webinar", self.webinar).add_registrant(
+		if self.meeting:
+			session = frappe.get_cached_doc("Zoom Meeting", self.meeting)
+		elif self.webinar:
+			session = frappe.get_cached_doc("Zoom Webinar", self.webinar)
+		else:
+			frappe.throw(frappe._("Registration must reference a Zoom Meeting or Zoom Webinar."))
+
+		registration = session.add_registrant(
 			self.email, self.first_name, self.last_name, additional_params
 		)
 
