@@ -29,7 +29,7 @@
   {"fieldname": "date", "fieldtype": "Date", "label": "Date", "reqd": 1},
   {"fieldname": "column_break_time", "fieldtype": "Column Break"},
   {"fieldname": "start_time", "fieldtype": "Time", "label": "Start Time", "reqd": 1},
-  {"fieldname": "duration", "fieldtype": "Duration", "label": "Duration"},
+  {"fieldname": "duration", "fieldtype": "Duration", "hide_days": 1, "label": "Duration"},
   {"fieldname": "column_break_tz", "fieldtype": "Column Break"},
   {"fieldname": "timezone", "fieldtype": "Autocomplete", "label": "Timezone"},
   {"fieldname": "meeting_details_section", "fieldtype": "Section Break", "label": "Meeting Details"},
