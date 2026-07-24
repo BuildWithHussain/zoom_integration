@@ -63,9 +63,7 @@ class ZoomWebinarRegistration(Document):
 		else:
 			frappe.throw(frappe._("Registration must reference a Zoom Meeting or Zoom Webinar."))
 
-		registration = session.add_registrant(
-			self.email, self.first_name, self.last_name, additional_params
-		)
+		registration = session.add_registrant(self.email, self.first_name, self.last_name, additional_params)
 
 		self.join_url = registration.get("join_url")
 		self.registrant_id = registration.get("registrant_id")

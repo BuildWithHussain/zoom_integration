@@ -151,7 +151,9 @@ class ZoomMeeting(Document):
 			entry["total_duration"] += participant.get("duration", 0)
 
 		for email, details in summary.items():
-			if frappe.db.exists("Zoom Webinar Attendance Record", {"meeting": self.name, "user_email": email}):
+			if frappe.db.exists(
+				"Zoom Webinar Attendance Record", {"meeting": self.name, "user_email": email}
+			):
 				continue
 			frappe.get_doc(
 				{

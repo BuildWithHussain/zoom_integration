@@ -25,9 +25,7 @@ class IntegrationTestZoomWebinarRegistration(IntegrationTestCase):
 				}
 			).insert()
 
-		with patch(
-			f"{MEETING_CONTROLLER}.add_zoom_registrant", return_value=ADD_MEETING_REGISTRANT_RESPONSE
-		):
+		with patch(f"{MEETING_CONTROLLER}.add_zoom_registrant", return_value=ADD_MEETING_REGISTRANT_RESPONSE):
 			registration = frappe.get_doc(
 				{
 					"doctype": "Zoom Webinar Registration",
