@@ -11,7 +11,7 @@ from zoom_integration.tests.zoom_fixtures import ADD_MEETING_REGISTRANT_RESPONSE
 MEETING_CONTROLLER = "zoom_integration.zoom_integration.doctype.zoom_meeting.zoom_meeting"
 
 
-class IntegrationTestZoomWebinarRegistration(IntegrationTestCase):
+class IntegrationTestZoomSessionRegistration(IntegrationTestCase):
 	def test_registration_for_meeting_calls_meeting_add_registrant(self):
 		with patch(f"{MEETING_CONTROLLER}.create_zoom_session", return_value=CREATE_MEETING_RESPONSE):
 			meeting = frappe.get_doc(
@@ -28,7 +28,7 @@ class IntegrationTestZoomWebinarRegistration(IntegrationTestCase):
 		with patch(f"{MEETING_CONTROLLER}.add_zoom_registrant", return_value=ADD_MEETING_REGISTRANT_RESPONSE):
 			registration = frappe.get_doc(
 				{
-					"doctype": "Zoom Webinar Registration",
+					"doctype": "Zoom Session Registration",
 					"meeting": meeting.name,
 					"email": "alice@example.com",
 					"first_name": "Alice",

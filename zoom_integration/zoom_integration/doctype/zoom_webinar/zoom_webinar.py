@@ -165,7 +165,7 @@ class ZoomWebinar(Document):
 		if self.zoom_webinar_id:
 			self.delete_webinar_on_zoom()
 
-		# frappe.db.delete("Zoom Webinar Registration", {"webinar": self.name})
+		# frappe.db.delete("Zoom Session Registration", {"webinar": self.name})
 
 	def delete_webinar_on_zoom(self):
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
@@ -281,13 +281,13 @@ class ZoomWebinar(Document):
 						continue
 
 					if frappe.db.exists(
-						"Zoom Webinar Attendance Record",
+						"Zoom Session Attendance Record",
 						{"webinar": self.name, "user_email": user_email},
 					):
 						continue
 
 					registration = frappe.db.get_value(
-						"Zoom Webinar Registration",
+						"Zoom Session Registration",
 						{"email": user_email},
 						"name",
 					)
@@ -295,7 +295,7 @@ class ZoomWebinar(Document):
 					try:
 						doc = frappe.get_doc(
 							{
-								"doctype": "Zoom Webinar Attendance Record",
+								"doctype": "Zoom Session Attendance Record",
 								"registration": registration,
 								"webinar": self.name,
 								"user_email": user_email,
@@ -375,7 +375,7 @@ class ZoomWebinar(Document):
 				for registrant in batch:
 					try:
 						if frappe.db.exists(
-							"Zoom Webinar Registration",
+							"Zoom Session Registration",
 							{
 								"registrant_id": registrant.get("id"),
 								"webinar": self.name,
@@ -384,7 +384,7 @@ class ZoomWebinar(Document):
 							continue
 						doc = frappe.get_doc(
 							{
-								"doctype": "Zoom Webinar Registration",
+								"doctype": "Zoom Session Registration",
 								"registrant_id": registrant.get("id"),
 								"join_url": registrant.get("join_url"),
 								"webinar": self.name,

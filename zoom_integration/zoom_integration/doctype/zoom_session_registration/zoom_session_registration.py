@@ -2,10 +2,11 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
-class ZoomWebinarRegistration(Document):
+class ZoomSessionRegistration(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -28,8 +29,12 @@ class ZoomWebinarRegistration(Document):
 		registrant_id: DF.Data | None
 		synced_from_zoom: DF.Check
 		user: DF.Link | None
-		webinar: DF.Link
+		webinar: DF.Link | None
 	# end: auto-generated types
+
+	def validate(self):
+		if bool(self.webinar) == bool(self.meeting):
+			frappe.throw(_("Set exactly one of Webinar or Meeting."))
 
 	def before_insert(self):
 		if not (self.user or self.email):
@@ -40,7 +45,7 @@ class ZoomWebinarRegistration(Document):
 			self.user = user_exists
 
 		if self.user == "Guest":
-			frappe.throw("Guest user cannot register for webinar")
+			frappe.throw(_("Guest user cannot register for a Zoom session"))
 		elif self.user and not self.email:
 			user_doc = frappe.get_cached_doc("User", self.user)
 			self.email = user_doc.email
@@ -56,12 +61,10 @@ class ZoomWebinarRegistration(Document):
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
 
-		if self.meeting:
-			session = frappe.get_cached_doc("Zoom Meeting", self.meeting)
-		elif self.webinar:
-			session = frappe.get_cached_doc("Zoom Webinar", self.webinar)
-		else:
-			frappe.throw(frappe._("Registration must reference a Zoom Meeting or Zoom Webinar."))
+		# validate() guarantees exactly one of meeting/webinar is set
+		session = frappe.get_cached_doc(
+			"Zoom Meeting" if self.meeting else "Zoom Webinar", self.meeting or self.webinar
+		)
 
 		registration = session.add_registrant(self.email, self.first_name, self.last_name, additional_params)
 

@@ -35,7 +35,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Zoom Webinar Registration",
+   "options": "Zoom Session Registration",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -153,7 +153,7 @@
  "modified": "2025-12-09 13:13:19.795660",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Registration",
+ "name": "Zoom Session Registration",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [

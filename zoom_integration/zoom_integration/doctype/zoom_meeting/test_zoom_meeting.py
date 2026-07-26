@@ -63,7 +63,7 @@ class TestZoomMeeting(IntegrationTestCase):
 			meeting.sync_attendance()
 
 		records = frappe.get_all(
-			"Zoom Webinar Attendance Record",
+			"Zoom Session Attendance Record",
 			filters={"meeting": meeting.name},
 			fields=["user_email", "total_duration"],
 		)

@@ -16,7 +16,7 @@
  "name": "Consolidated Webinar Attendance",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Zoom Webinar Attendance Record",
+ "ref_doctype": "Zoom Session Attendance Record",
  "report_name": "Consolidated Webinar Attendance",
  "report_type": "Script Report",
  "roles": [

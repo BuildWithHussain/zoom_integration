@@ -161,11 +161,11 @@
  "index_web_pages_for_search": 1,
  "links": [
   {
-   "link_doctype": "Zoom Webinar Registration",
+   "link_doctype": "Zoom Session Registration",
    "link_fieldname": "webinar"
   },
   {
-   "link_doctype": "Zoom Webinar Attendance Record",
+   "link_doctype": "Zoom Session Attendance Record",
    "link_fieldname": "webinar"
   }
  ],

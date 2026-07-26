@@ -27,7 +27,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Zoom Webinar Attendance Record",
+   "options": "Zoom Session Attendance Record",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -51,7 +51,7 @@
    "fieldname": "registration",
    "fieldtype": "Link",
    "label": "Registration",
-   "options": "Zoom Webinar Registration",
+   "options": "Zoom Session Registration",
    "search_index": 1
   },
   {
@@ -91,7 +91,7 @@
  "modified": "2026-05-14 21:33:32.754713",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Attendance Record",
+ "name": "Zoom Session Attendance Record",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
