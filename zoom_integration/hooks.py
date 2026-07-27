@@ -26,7 +26,7 @@ app_license = "agpl-3.0"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/zoom_integration/css/zoom_integration.css"
-# app_include_js = "/assets/zoom_integration/js/zoom_integration.js"
+app_include_js = "/assets/zoom_integration/js/zoom_timezones.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/zoom_integration/css/zoom_integration.css"
