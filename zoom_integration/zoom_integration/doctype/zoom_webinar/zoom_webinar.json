@@ -162,11 +162,11 @@
  "links": [
   {
    "link_doctype": "Zoom Session Registration",
-   "link_fieldname": "webinar"
+   "link_fieldname": "reference_name"
   },
   {
    "link_doctype": "Zoom Session Attendance Record",
-   "link_fieldname": "webinar"
+   "link_fieldname": "reference_name"
   }
  ],
  "modified": "2026-03-11 10:25:34.016507",

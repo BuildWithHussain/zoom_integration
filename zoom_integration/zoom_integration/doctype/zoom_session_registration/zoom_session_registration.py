@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from zoom_integration.utils import validate_session_reference
+
 
 class ZoomSessionRegistration(Document):
 	# begin: auto-generated types
@@ -25,16 +27,15 @@ class ZoomSessionRegistration(Document):
 		first_name: DF.Data | None
 		join_url: DF.Data | None
 		last_name: DF.Data | None
-		meeting: DF.Link | None
+		reference_doctype: DF.Link
+		reference_name: DF.DynamicLink
 		registrant_id: DF.Data | None
 		synced_from_zoom: DF.Check
 		user: DF.Link | None
-		webinar: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
-		if bool(self.webinar) == bool(self.meeting):
-			frappe.throw(_("Set exactly one of Webinar or Meeting."))
+		validate_session_reference(self)
 
 	def before_insert(self):
 		if not (self.user or self.email):
@@ -61,10 +62,7 @@ class ZoomSessionRegistration(Document):
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
 
-		# validate() guarantees exactly one of meeting/webinar is set
-		session = frappe.get_cached_doc(
-			"Zoom Meeting" if self.meeting else "Zoom Webinar", self.meeting or self.webinar
-		)
+		session = frappe.get_cached_doc(self.reference_doctype, self.reference_name)
 
 		registration = session.add_registrant(self.email, self.first_name, self.last_name, additional_params)
 

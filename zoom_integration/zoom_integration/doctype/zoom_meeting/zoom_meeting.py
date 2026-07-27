@@ -152,13 +152,15 @@ class ZoomMeeting(Document):
 
 		for email, details in summary.items():
 			if frappe.db.exists(
-				"Zoom Session Attendance Record", {"meeting": self.name, "user_email": email}
+				"Zoom Session Attendance Record",
+				{"reference_doctype": self.doctype, "reference_name": self.name, "user_email": email},
 			):
 				continue
 			frappe.get_doc(
 				{
 					"doctype": "Zoom Session Attendance Record",
-					"meeting": self.name,
+					"reference_doctype": self.doctype,
+					"reference_name": self.name,
 					"user_email": email,
 					"full_name": details["name"],
 					"total_duration": details["total_duration"],

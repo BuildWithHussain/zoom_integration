@@ -1,20 +1,63 @@
 # Copyright (c) 2025, Build With Hussain and Contributors
 # See license.txt
 
-# import frappe
+from unittest.mock import patch
+
+import frappe
 from frappe.tests import IntegrationTestCase
 
-# On IntegrationTestCase, the doctype test records and all
-# link-field test record dependencies are recursively loaded
-# Use these module variables to add/remove to/from that list
-EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
-IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
+from zoom_integration.tests.zoom_fixtures import (
+	WEBINAR_PARTICIPANTS,
+	create_webinar_response,
+	mock_response,
+	webinar_registrants,
+)
+
+CONTROLLER = "zoom_integration.zoom_integration.doctype.zoom_webinar.zoom_webinar"
 
 
 class IntegrationTestZoomWebinar(IntegrationTestCase):
-	"""
-	Integration tests for ZoomWebinar.
-	Use this class for testing interactions between multiple components.
-	"""
+	def _insert_webinar(self, title="Test Webinar"):
+		with patch(f"{CONTROLLER}.requests") as mock_requests:
+			mock_requests.post.return_value = mock_response(201, create_webinar_response())
+			return frappe.get_doc(
+				{
+					"doctype": "Zoom Webinar",
+					"title": title,
+					"date": "2026-08-01",
+					"start_time": "10:00:00",
+					"duration": 3600,
+					"timezone": "Asia/Calcutta",
+				}
+			).insert()
 
-	pass
+	def test_sync_registrations_creates_registrations_against_the_webinar(self):
+		webinar = self._insert_webinar("Registrations Webinar")
+		registrants = webinar_registrants()
+
+		with patch(f"{CONTROLLER}.get_webinar_registrant_details", return_value=registrants):
+			webinar.sync_registrations_from_zoom()
+
+		registrations = frappe.get_all(
+			"Zoom Session Registration",
+			filters={"reference_doctype": "Zoom Webinar", "reference_name": webinar.name},
+			fields=["email", "registrant_id"],
+		)
+		self.assertEqual([r.email for r in registrations], ["carol@example.com"])
+		self.assertEqual(registrations[0].registrant_id, registrants[0]["id"])
+
+	def test_sync_attendance_creates_records_against_the_webinar(self):
+		webinar = self._insert_webinar("Attendance Webinar")
+
+		with (
+			patch(f"{CONTROLLER}.get_webinar_attendance_details", return_value=WEBINAR_PARTICIPANTS),
+			patch(f"{CONTROLLER}.get_webinar_registrant_details", return_value=[]),
+		):
+			webinar.sync_attendance()
+
+		records = frappe.get_all(
+			"Zoom Session Attendance Record",
+			filters={"reference_doctype": "Zoom Webinar", "reference_name": webinar.name},
+			fields=["user_email", "total_duration"],
+		)
+		self.assertEqual({r.user_email for r in records}, {"carol@example.com", "dan@example.com"})

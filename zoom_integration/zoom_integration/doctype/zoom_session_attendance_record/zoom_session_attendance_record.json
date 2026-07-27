@@ -6,8 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "webinar",
-  "meeting",
+  "reference_doctype",
+  "reference_name",
   "total_duration",
   "full_name",
   "column_break_bwzj",
@@ -33,18 +33,24 @@
    "search_index": 1
   },
   {
-   "fieldname": "webinar",
+   "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Webinar",
-   "options": "Zoom Webinar",
+   "in_standard_filter": 1,
+   "label": "Session Type",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Zoom Meeting\",\"Zoom Webinar\"]]]",
+   "options": "DocType",
+   "reqd": 1,
    "search_index": 1
   },
   {
-   "fieldname": "meeting",
-   "fieldtype": "Link",
-   "label": "Meeting",
-   "options": "Zoom Meeting",
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Session",
+   "options": "reference_doctype",
+   "reqd": 1,
    "search_index": 1
   },
   {
