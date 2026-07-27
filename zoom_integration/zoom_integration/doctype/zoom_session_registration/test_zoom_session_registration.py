@@ -11,7 +11,7 @@ from zoom_integration.tests.zoom_fixtures import (
 	add_webinar_registrant_response,
 	create_meeting_response,
 	create_webinar_response,
-	mock_response,
+	mock_zoom_post,
 )
 
 MEETING_CONTROLLER = "zoom_integration.zoom_integration.doctype.zoom_meeting.zoom_meeting"
@@ -33,8 +33,7 @@ class IntegrationTestZoomSessionRegistration(IntegrationTestCase):
 			).insert()
 
 	def _insert_webinar(self):
-		with patch(f"{WEBINAR_CONTROLLER}.requests") as mock_requests:
-			mock_requests.post.return_value = mock_response(201, create_webinar_response())
+		with mock_zoom_post(WEBINAR_CONTROLLER, 201, create_webinar_response()):
 			return frappe.get_doc(
 				{
 					"doctype": "Zoom Webinar",
@@ -78,8 +77,7 @@ class IntegrationTestZoomSessionRegistration(IntegrationTestCase):
 		registration = self._new_registration(webinar, email="carol@example.com", first_name="Carol").insert()
 		registrant = add_webinar_registrant_response()
 
-		with patch(f"{WEBINAR_CONTROLLER}.requests") as mock_requests:
-			mock_requests.post.return_value = mock_response(200, registrant)
+		with mock_zoom_post(WEBINAR_CONTROLLER, 200, registrant) as mock_requests:
 			registration.submit()
 
 		called_url = mock_requests.post.call_args.args[0]

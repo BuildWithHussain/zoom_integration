@@ -3,6 +3,8 @@ so mocks behave like production. Reused by all zoom_integration tests."""
 
 import random
 import string
+from contextlib import contextmanager
+from unittest.mock import patch
 
 CREATE_MEETING_RESPONSE = {
 	"uuid": "aDEFghiJKLmno12PQ==",
@@ -175,3 +177,19 @@ def mock_response(status_code, json_data=None, text=""):
 	resp.text = text or ""
 	resp.headers = {}
 	return resp
+
+
+TEST_ZOOM_HEADERS = {"Authorization": "Bearer test-token", "content-type": "application/json"}
+
+
+@contextmanager
+def mock_zoom_post(controller, status_code, json_data):
+	"""Zoom Webinar posts through `requests` and fetches its own token, so both need
+	patching -- otherwise the token call hits Zoom for real and needs live credentials.
+	"""
+	with (
+		patch(f"{controller}.requests") as mock_requests,
+		patch(f"{controller}.get_authenticated_headers_for_zoom", return_value=TEST_ZOOM_HEADERS),
+	):
+		mock_requests.post.return_value = mock_response(status_code, json_data)
+		yield mock_requests

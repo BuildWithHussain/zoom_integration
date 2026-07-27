@@ -9,7 +9,7 @@ from frappe.tests import IntegrationTestCase
 from zoom_integration.tests.zoom_fixtures import (
 	WEBINAR_PARTICIPANTS,
 	create_webinar_response,
-	mock_response,
+	mock_zoom_post,
 	webinar_registrants,
 )
 
@@ -18,8 +18,7 @@ CONTROLLER = "zoom_integration.zoom_integration.doctype.zoom_webinar.zoom_webina
 
 class IntegrationTestZoomWebinar(IntegrationTestCase):
 	def _insert_webinar(self, title="Test Webinar"):
-		with patch(f"{CONTROLLER}.requests") as mock_requests:
-			mock_requests.post.return_value = mock_response(201, create_webinar_response())
+		with mock_zoom_post(CONTROLLER, 201, create_webinar_response()):
 			return frappe.get_doc(
 				{
 					"doctype": "Zoom Webinar",
