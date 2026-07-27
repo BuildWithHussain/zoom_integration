@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 import frappe
 import requests
@@ -60,18 +61,17 @@ def add_zoom_registrant(resource: str, session_id: str, body: dict) -> dict:
 	return data
 
 
-def _paginate(url_builder, item_key: str, page_size: int) -> list[dict]:
+def _paginate(url: str, item_key: str) -> list[dict]:
 	"""Follow Zoom's next_page_token pagination and collect `item_key` items."""
 	headers = get_authenticated_headers_for_zoom()
 	items: list[dict] = []
 	next_page_token = None
 
 	while True:
-		url = url_builder(page_size)
-		if next_page_token:
-			url += f"&next_page_token={next_page_token}"
+		# rebuild from `url` each pass so the token replaces rather than stacks
+		page_url = f"{url}&next_page_token={next_page_token}" if next_page_token else url
 
-		response = requests.get(url, headers=headers, timeout=30)
+		response = requests.get(page_url, headers=headers, timeout=30)
 		if response.status_code != 200:
 			frappe.throw(f"Failed to fetch {item_key} from Zoom: {response.text}")
 
@@ -84,22 +84,14 @@ def _paginate(url_builder, item_key: str, page_size: int) -> list[dict]:
 	return items
 
 
-def get_zoom_registrants(resource: str, session_id: str, page_size: int = DEFAULT_PAGE_SIZE) -> list[dict]:
-	return _paginate(
-		lambda size: f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}/registrants?page_size={size}",
-		"registrants",
-		page_size,
-	)
+def get_zoom_registrants(resource: str, session_id: str) -> list[dict]:
+	url = f"{ZOOM_API_BASE_PATH}/{resource}/{session_id}/registrants?page_size={DEFAULT_PAGE_SIZE}"
+	return _paginate(url, "registrants")
 
 
-def get_zoom_participants(resource: str, session_uuid: str, page_size: int = DEFAULT_PAGE_SIZE) -> list[dict]:
+def get_zoom_participants(resource: str, session_uuid: str) -> list[dict]:
 	# ponytail: single-encoding the UUID covers the common case; double-encode
 	# here if you hit meeting UUIDs that start with "/" or contain "//".
-	from urllib.parse import quote
-
 	encoded_uuid = quote(session_uuid, safe="")
-	return _paginate(
-		lambda size: f"{ZOOM_API_BASE_PATH}/past_{resource}/{encoded_uuid}/participants?page_size={size}",
-		"participants",
-		page_size,
-	)
+	url = f"{ZOOM_API_BASE_PATH}/past_{resource}/{encoded_uuid}/participants?page_size={DEFAULT_PAGE_SIZE}"
+	return _paginate(url, "participants")

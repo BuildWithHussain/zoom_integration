@@ -101,3 +101,33 @@ class TestZoomAPI(IntegrationTestCase):
 			called_url = mock_requests.get.call_args.args[0]
 			self.assertIn("/meetings/91234567890/registrants", called_url)
 			self.assertEqual(result[0]["email"], "alice@example.com")
+
+	def test_pagination_follows_next_page_token_without_stacking_it(self):
+		# three pages: stacking only shows from the third request onwards
+		page_one = {"registrants": [{"email": "one@example.com"}], "next_page_token": "TOKEN1"}
+		page_two = {"registrants": [{"email": "two@example.com"}], "next_page_token": "TOKEN2"}
+		page_three = {"registrants": [{"email": "three@example.com"}], "next_page_token": ""}
+
+		with (
+			patch.object(api, "get_authenticated_headers_for_zoom", return_value=HEADERS),
+			patch.object(api, "requests") as mock_requests,
+		):
+			mock_requests.get.side_effect = [
+				mock_response(200, page_one),
+				mock_response(200, page_two),
+				mock_response(200, page_three),
+			]
+
+			result = api.get_zoom_registrants("meetings", "91234567890")
+
+		self.assertEqual(
+			[r["email"] for r in result],
+			["one@example.com", "two@example.com", "three@example.com"],
+		)
+
+		first_url, second_url, third_url = (call.args[0] for call in mock_requests.get.call_args_list)
+		self.assertNotIn("next_page_token", first_url)
+		self.assertIn("next_page_token=TOKEN1", second_url)
+		self.assertEqual(second_url.count("next_page_token"), 1)
+		self.assertIn("next_page_token=TOKEN2", third_url)
+		self.assertEqual(third_url.count("next_page_token"), 1)
