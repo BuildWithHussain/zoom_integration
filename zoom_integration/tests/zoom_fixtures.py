@@ -18,6 +18,12 @@ CREATE_MEETING_RESPONSE = {
 	"settings": {"approval_type": 0, "registration_type": 1, "audio": "both"},
 }
 
+
+def create_meeting_response(meeting_id):
+	"""Zoom Meeting is named after its Zoom ID, so tests sharing a class need distinct IDs."""
+	return {**CREATE_MEETING_RESPONSE, "id": int(meeting_id)}
+
+
 # PATCH /meetings/{id} and DELETE /meetings/{id} return 204 with an empty body.
 
 ADD_MEETING_REGISTRANT_RESPONSE = {

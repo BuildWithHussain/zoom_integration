@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:zoom_meeting_id",
  "creation": "2026-07-24 00:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -123,6 +124,7 @@
  "modified_by": "Administrator",
  "module": "Zoom Integration",
  "name": "Zoom Meeting",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
