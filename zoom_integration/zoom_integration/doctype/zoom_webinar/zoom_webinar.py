@@ -295,7 +295,11 @@ class ZoomWebinar(Document):
 
 					registration = frappe.db.get_value(
 						"Zoom Session Registration",
-						{"email": user_email},
+						{
+							"reference_doctype": self.doctype,
+							"reference_name": self.name,
+							"email": user_email,
+						},
 						"name",
 					)
 

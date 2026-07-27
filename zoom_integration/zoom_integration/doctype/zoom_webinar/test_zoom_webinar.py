@@ -71,3 +71,33 @@ class IntegrationTestZoomWebinar(IntegrationTestCase):
 			reloaded.save()
 
 		mock_requests.patch.assert_not_called()
+
+	def test_attendance_does_not_borrow_another_sessions_registration(self):
+		webinar = self._insert_webinar("Scoped Webinar")
+		other = self._insert_webinar("Other Webinar")
+
+		# same attendee, registered only on the other webinar
+		frappe.get_doc(
+			{
+				"doctype": "Zoom Session Registration",
+				"reference_doctype": "Zoom Webinar",
+				"reference_name": other.name,
+				"email": "carol@example.com",
+				"first_name": "Carol",
+				"registrant_id": frappe.generate_hash(length=12),
+				"synced_from_zoom": 1,
+			}
+		).insert()
+
+		with (
+			patch(f"{CONTROLLER}.get_webinar_attendance_details", return_value=WEBINAR_PARTICIPANTS[:1]),
+			patch(f"{CONTROLLER}.get_webinar_registrant_details", return_value=[]),
+		):
+			webinar.sync_attendance()
+
+		linked = frappe.db.get_value(
+			"Zoom Session Attendance Record",
+			{"reference_name": webinar.name, "user_email": "carol@example.com"},
+			"registration",
+		)
+		self.assertIsNone(linked)
