@@ -37,7 +37,7 @@
  "modified": "2025-10-27 17:09:35.168116",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Additional Param",
+ "name": "Zoom Session Additional Param",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

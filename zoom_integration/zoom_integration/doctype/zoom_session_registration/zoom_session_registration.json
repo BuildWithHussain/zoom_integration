@@ -103,7 +103,7 @@
    "fieldname": "additional_params",
    "fieldtype": "Table",
    "label": "Additional Params",
-   "options": "Zoom Webinar Additional Param"
+   "options": "Zoom Session Additional Param"
   },
   {
    "fetch_from": "user.email",

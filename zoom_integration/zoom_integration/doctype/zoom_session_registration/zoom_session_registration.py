@@ -15,11 +15,11 @@ class ZoomSessionRegistration(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import (
-			ZoomWebinarAdditionalParam,
+		from zoom_integration.zoom_integration.doctype.zoom_session_additional_param.zoom_session_additional_param import (
+			ZoomSessionAdditionalParam,
 		)
 
-		additional_params: DF.Table[ZoomWebinarAdditionalParam]
+		additional_params: DF.Table[ZoomSessionAdditionalParam]
 		amended_from: DF.Link | None
 		email: DF.Data | None
 		first_name: DF.Data | None
