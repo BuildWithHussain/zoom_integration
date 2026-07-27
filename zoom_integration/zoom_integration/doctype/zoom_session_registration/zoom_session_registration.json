@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "webinar",
+  "reference_doctype",
+  "reference_name",
   "column_break_baez",
   "user",
   "synced_from_zoom",
@@ -34,18 +35,29 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Zoom Webinar Registration",
+   "options": "Zoom Session Registration",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
   {
-   "fieldname": "webinar",
+   "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Webinar",
-   "options": "Zoom Webinar",
+   "label": "Session Type",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Zoom Meeting\",\"Zoom Webinar\"]]]",
+   "options": "DocType",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Session",
+   "options": "reference_doctype",
    "reqd": 1,
    "search_index": 1
   },
@@ -94,7 +106,7 @@
    "fieldname": "additional_params",
    "fieldtype": "Table",
    "label": "Additional Params",
-   "options": "Zoom Webinar Additional Param"
+   "options": "Zoom Session Additional Param"
   },
   {
    "fetch_from": "user.email",
@@ -144,7 +156,7 @@
  "modified": "2025-12-09 13:13:19.795660",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Registration",
+ "name": "Zoom Session Registration",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [

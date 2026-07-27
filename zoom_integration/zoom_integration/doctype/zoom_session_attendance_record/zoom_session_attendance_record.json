@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "webinar",
+  "reference_doctype",
+  "reference_name",
   "total_duration",
   "full_name",
   "column_break_bwzj",
@@ -26,17 +27,29 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Zoom Webinar Attendance Record",
+   "options": "Zoom Session Attendance Record",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
   {
-   "fieldname": "webinar",
+   "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Webinar",
-   "options": "Zoom Webinar",
+   "in_standard_filter": 1,
+   "label": "Session Type",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Zoom Meeting\",\"Zoom Webinar\"]]]",
+   "options": "DocType",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Session",
+   "options": "reference_doctype",
    "reqd": 1,
    "search_index": 1
   },
@@ -44,7 +57,7 @@
    "fieldname": "registration",
    "fieldtype": "Link",
    "label": "Registration",
-   "options": "Zoom Webinar Registration",
+   "options": "Zoom Session Registration",
    "search_index": 1
   },
   {
@@ -84,7 +97,7 @@
  "modified": "2026-05-14 21:33:32.754713",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
- "name": "Zoom Webinar Attendance Record",
+ "name": "Zoom Session Attendance Record",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [

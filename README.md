@@ -1,6 +1,6 @@
 ### Zoom Integration
 
-Zoom Integration for Frappe. Create and manage webinars.
+Zoom Integration for Frappe. Create and manage meetings and webinars.
 
 ### Setup
 

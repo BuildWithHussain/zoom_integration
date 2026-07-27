@@ -9,7 +9,7 @@ import requests
 from frappe import _
 from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
-from frappe.utils import cint, format_datetime
+from frappe.utils import cint, format_datetime, getdate
 from frappe.utils.data import convert_utc_to_timezone, get_datetime, get_time
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
@@ -81,15 +81,12 @@ class ZoomWebinar(Document):
 			self.zoom_link = data.get("join_url")
 			self.zoom_webinar_id = data.get("id")
 			frappe.msgprint(_("Webinar created successfully on Zoom."))
-			create_request_log(
-				data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-			)
+			create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 		else:
 			create_request_log(
 				response.text,
 				is_remote_request=1,
 				service_name="Zoom",
-				request_headers=headers,
 				status="Failed",
 			)
 			frappe.throw("Failed to create webinar on Zoom: {0}".format(response.text))
@@ -113,8 +110,8 @@ class ZoomWebinar(Document):
 
 		current_start = get_time(self.get("start_time"))
 		previous_start = get_time(before_save.get("start_time"))
-		current_date = self.get("date")
-		previous_date = str(before_save.get("date"))
+		current_date = getdate(self.get("date"))
+		previous_date = getdate(before_save.get("date"))
 
 		zoom_related_field_not_updated = (
 			self.title == before_save.title
@@ -165,7 +162,10 @@ class ZoomWebinar(Document):
 		if self.zoom_webinar_id:
 			self.delete_webinar_on_zoom()
 
-		# frappe.db.delete("Zoom Webinar Registration", {"webinar": self.name})
+		# frappe.db.delete(
+		# 	"Zoom Session Registration",
+		# 	{"reference_doctype": self.doctype, "reference_name": self.name},
+		# )
 
 	def delete_webinar_on_zoom(self):
 		url = f"{ZOOM_API_BASE_PATH}/webinars/{self.zoom_webinar_id}"
@@ -231,15 +231,12 @@ class ZoomWebinar(Document):
 				response.text,
 				is_remote_request=1,
 				service_name="Zoom",
-				request_headers=headers,
 				status="Failed",
 			)
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
 
 		data = response.json()
-		create_request_log(
-			data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-		)
+		create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 
 		if is_webinar_plus:
 			ticket = data.get("tickets", [{}])[0]
@@ -281,23 +278,32 @@ class ZoomWebinar(Document):
 						continue
 
 					if frappe.db.exists(
-						"Zoom Webinar Attendance Record",
-						{"webinar": self.name, "user_email": user_email},
+						"Zoom Session Attendance Record",
+						{
+							"reference_doctype": self.doctype,
+							"reference_name": self.name,
+							"user_email": user_email,
+						},
 					):
 						continue
 
 					registration = frappe.db.get_value(
-						"Zoom Webinar Registration",
-						{"email": user_email},
+						"Zoom Session Registration",
+						{
+							"reference_doctype": self.doctype,
+							"reference_name": self.name,
+							"email": user_email,
+						},
 						"name",
 					)
 
 					try:
 						doc = frappe.get_doc(
 							{
-								"doctype": "Zoom Webinar Attendance Record",
+								"doctype": "Zoom Session Attendance Record",
 								"registration": registration,
-								"webinar": self.name,
+								"reference_doctype": self.doctype,
+								"reference_name": self.name,
 								"user_email": user_email,
 								"full_name": attendance.get("name"),
 								"total_duration": attendance.get("total_duration"),
@@ -375,19 +381,21 @@ class ZoomWebinar(Document):
 				for registrant in batch:
 					try:
 						if frappe.db.exists(
-							"Zoom Webinar Registration",
+							"Zoom Session Registration",
 							{
 								"registrant_id": registrant.get("id"),
-								"webinar": self.name,
+								"reference_doctype": self.doctype,
+								"reference_name": self.name,
 							},
 						):
 							continue
 						doc = frappe.get_doc(
 							{
-								"doctype": "Zoom Webinar Registration",
+								"doctype": "Zoom Session Registration",
 								"registrant_id": registrant.get("id"),
 								"join_url": registrant.get("join_url"),
-								"webinar": self.name,
+								"reference_doctype": self.doctype,
+								"reference_name": self.name,
 								"email": registrant.get("email"),
 								"first_name": registrant.get("first_name"),
 								"last_name": registrant.get("last_name"),

@@ -2,10 +2,13 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
+from zoom_integration.utils import validate_session_reference
 
-class ZoomWebinarRegistration(Document):
+
+class ZoomSessionRegistration(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,21 +17,25 @@ class ZoomWebinarRegistration(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from zoom_integration.zoom_integration.doctype.zoom_webinar_additional_param.zoom_webinar_additional_param import (
-			ZoomWebinarAdditionalParam,
+		from zoom_integration.zoom_integration.doctype.zoom_session_additional_param.zoom_session_additional_param import (
+			ZoomSessionAdditionalParam,
 		)
 
-		additional_params: DF.Table[ZoomWebinarAdditionalParam]
+		additional_params: DF.Table[ZoomSessionAdditionalParam]
 		amended_from: DF.Link | None
 		email: DF.Data | None
 		first_name: DF.Data | None
 		join_url: DF.Data | None
 		last_name: DF.Data | None
+		reference_doctype: DF.Link
+		reference_name: DF.DynamicLink
 		registrant_id: DF.Data | None
 		synced_from_zoom: DF.Check
 		user: DF.Link | None
-		webinar: DF.Link
 	# end: auto-generated types
+
+	def validate(self):
+		validate_session_reference(self)
 
 	def before_insert(self):
 		if not (self.user or self.email):
@@ -39,7 +46,7 @@ class ZoomWebinarRegistration(Document):
 			self.user = user_exists
 
 		if self.user == "Guest":
-			frappe.throw("Guest user cannot register for webinar")
+			frappe.throw(_("Guest user cannot register for a Zoom session"))
 		elif self.user and not self.email:
 			user_doc = frappe.get_cached_doc("User", self.user)
 			self.email = user_doc.email
@@ -55,9 +62,9 @@ class ZoomWebinarRegistration(Document):
 		if self.additional_params:
 			additional_params = {param.key: param.value for param in self.additional_params}
 
-		registration = frappe.get_cached_doc("Zoom Webinar", self.webinar).add_registrant(
-			self.email, self.first_name, self.last_name, additional_params
-		)
+		session = frappe.get_cached_doc(self.reference_doctype, self.reference_name)
+
+		registration = session.add_registrant(self.email, self.first_name, self.last_name, additional_params)
 
 		self.join_url = registration.get("join_url")
 		self.registrant_id = registration.get("registrant_id")

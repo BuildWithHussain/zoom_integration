@@ -46,7 +46,7 @@
    "color": "Orange",
    "doc_view": "List",
    "label": "View Attendance Data",
-   "link_to": "Zoom Webinar Attendance Record",
+   "link_to": "Zoom Session Attendance Record",
    "stats_filter": "[]",
    "type": "DocType"
   },

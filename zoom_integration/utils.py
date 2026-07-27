@@ -6,6 +6,17 @@ from frappe import _
 
 ZOOM_API_BASE_PATH = "https://api.zoom.us/v2"
 
+SESSION_DOCTYPES = ("Zoom Meeting", "Zoom Webinar")
+
+
+def validate_session_reference(doc):
+	"""link_filters narrows the desk picker client-side only, so guard it here too."""
+	if doc.reference_doctype not in SESSION_DOCTYPES:
+		frappe.throw(
+			_("Session Type must be one of {0}.").format(", ".join(SESSION_DOCTYPES)),
+			title=_("Invalid Session Type"),
+		)
+
 
 def authenticate():
 	zoom = frappe.get_single("Zoom Settings")
