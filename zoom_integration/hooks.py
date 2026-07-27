@@ -1,7 +1,7 @@
 app_name = "zoom_integration"
 app_title = "Zoom Integration"
 app_publisher = "Build With Hussain"
-app_description = "Zoom Integration for Frappe. Create and manage webinars."
+app_description = "Zoom Integration for Frappe. Create and manage meetings and webinars."
 app_email = "developer@buildwithhussain.com"
 app_license = "agpl-3.0"
 
