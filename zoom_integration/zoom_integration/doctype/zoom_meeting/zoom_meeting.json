@@ -119,7 +119,16 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
+ "links": [
+  {
+   "link_doctype": "Zoom Session Registration",
+   "link_fieldname": "reference_name"
+  },
+  {
+   "link_doctype": "Zoom Session Attendance Record",
+   "link_fieldname": "reference_name"
+  }
+ ],
  "modified": "2026-07-24 18:07:28.488733",
  "modified_by": "Administrator",
  "module": "Zoom Integration",
