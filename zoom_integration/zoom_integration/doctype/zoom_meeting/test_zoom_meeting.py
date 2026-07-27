@@ -90,3 +90,24 @@ class TestZoomMeeting(IntegrationTestCase):
 			"total_duration",
 		)
 		self.assertEqual(total_duration, 1500)
+
+	def test_saving_without_changes_does_not_call_zoom(self):
+		meeting, _, _ = self._insert_meeting()
+		# reload: a freshly inserted doc still holds `date` as the string it was given,
+		# so only a DB-loaded doc exercises the real comparison
+		reloaded = frappe.get_doc("Zoom Meeting", meeting.name)
+
+		with patch(f"{CONTROLLER}.update_zoom_session") as mock_update:
+			reloaded.save()
+
+		mock_update.assert_not_called()
+
+	def test_saving_a_changed_date_calls_zoom(self):
+		meeting, _, _ = self._insert_meeting()
+		reloaded = frappe.get_doc("Zoom Meeting", meeting.name)
+
+		with patch(f"{CONTROLLER}.update_zoom_session") as mock_update:
+			reloaded.date = "2026-09-02"
+			reloaded.save()
+
+		mock_update.assert_called_once()

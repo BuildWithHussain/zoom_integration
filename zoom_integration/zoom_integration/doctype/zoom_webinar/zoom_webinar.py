@@ -9,7 +9,7 @@ import requests
 from frappe import _
 from frappe.integrations.utils import create_request_log
 from frappe.model.document import Document
-from frappe.utils import cint, format_datetime
+from frappe.utils import cint, format_datetime, getdate
 from frappe.utils.data import convert_utc_to_timezone, get_datetime, get_time
 
 from zoom_integration.utils import ZOOM_API_BASE_PATH, get_authenticated_headers_for_zoom
@@ -113,8 +113,8 @@ class ZoomWebinar(Document):
 
 		current_start = get_time(self.get("start_time"))
 		previous_start = get_time(before_save.get("start_time"))
-		current_date = self.get("date")
-		previous_date = str(before_save.get("date"))
+		current_date = getdate(self.get("date"))
+		previous_date = getdate(before_save.get("date"))
 
 		zoom_related_field_not_updated = (
 			self.title == before_save.title

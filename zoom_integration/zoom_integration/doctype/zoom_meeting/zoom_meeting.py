@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, format_datetime, get_time
+from frappe.utils import cint, format_datetime, get_time, getdate
 
 from zoom_integration.api import (
 	add_zoom_registrant,
@@ -90,7 +90,7 @@ class ZoomMeeting(Document):
 			and self.agenda == before_save.agenda
 			and self.duration == before_save.duration
 			and self.timezone == before_save.timezone
-			and self.get("date") == str(before_save.get("date"))
+			and getdate(self.get("date")) == getdate(before_save.get("date"))
 			and get_time(self.get("start_time")) == get_time(before_save.get("start_time"))
 		)
 		if unchanged:

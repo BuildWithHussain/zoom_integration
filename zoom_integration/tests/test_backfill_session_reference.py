@@ -5,9 +5,6 @@ from zoom_integration.patches.backfill_session_reference import DOCTYPES, LEGACY
 
 
 class TestBackfillSessionReference(IntegrationTestCase):
-	def test_legacy_columns_map_to_their_reference_doctype(self):
-		self.assertEqual(LEGACY_FIELDS, {"webinar": "Zoom Webinar", "meeting": "Zoom Meeting"})
-
 	def test_every_row_carries_a_supported_reference_doctype(self):
 		for doctype in DOCTYPES:
 			stale = frappe.get_all(

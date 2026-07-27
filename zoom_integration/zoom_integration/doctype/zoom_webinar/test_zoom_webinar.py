@@ -9,6 +9,7 @@ from frappe.tests import IntegrationTestCase
 from zoom_integration.tests.zoom_fixtures import (
 	WEBINAR_PARTICIPANTS,
 	create_webinar_response,
+	mock_response,
 	mock_zoom_post,
 	webinar_registrants,
 )
@@ -60,3 +61,13 @@ class IntegrationTestZoomWebinar(IntegrationTestCase):
 			fields=["user_email", "total_duration"],
 		)
 		self.assertEqual({r.user_email for r in records}, {"carol@example.com", "dan@example.com"})
+
+	def test_saving_without_changes_does_not_call_zoom(self):
+		webinar = self._insert_webinar("Unchanged Webinar")
+		reloaded = frappe.get_doc("Zoom Webinar", webinar.name)
+
+		with mock_zoom_post(CONTROLLER, 204, {}) as mock_requests:
+			mock_requests.patch.return_value = mock_response(204, {})
+			reloaded.save()
+
+		mock_requests.patch.assert_not_called()
