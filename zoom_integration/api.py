@@ -17,14 +17,10 @@ def create_zoom_session(resource: str, body: dict) -> dict:
 
 	if response.status_code == 201:
 		data = response.json()
-		create_request_log(
-			data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-		)
+		create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 		return data
 
-	create_request_log(
-		response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
-	)
+	create_request_log(response.text, is_remote_request=1, service_name="Zoom", status="Failed")
 	frappe.throw(f"Failed to create {resource[:-1]} on Zoom: {response.text}")
 
 
@@ -56,15 +52,11 @@ def add_zoom_registrant(resource: str, session_id: str, body: dict) -> dict:
 	response = requests.post(url, headers=headers, data=json.dumps(body))
 
 	if response.status_code not in (200, 201):
-		create_request_log(
-			response.text, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Failed"
-		)
+		create_request_log(response.text, is_remote_request=1, service_name="Zoom", status="Failed")
 		frappe.throw(f"Failed to add registrant on Zoom: {response.text}")
 
 	data = response.json()
-	create_request_log(
-		data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-	)
+	create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 	return data
 
 

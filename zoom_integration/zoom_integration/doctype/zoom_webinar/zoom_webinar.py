@@ -81,15 +81,12 @@ class ZoomWebinar(Document):
 			self.zoom_link = data.get("join_url")
 			self.zoom_webinar_id = data.get("id")
 			frappe.msgprint(_("Webinar created successfully on Zoom."))
-			create_request_log(
-				data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-			)
+			create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 		else:
 			create_request_log(
 				response.text,
 				is_remote_request=1,
 				service_name="Zoom",
-				request_headers=headers,
 				status="Failed",
 			)
 			frappe.throw("Failed to create webinar on Zoom: {0}".format(response.text))
@@ -234,15 +231,12 @@ class ZoomWebinar(Document):
 				response.text,
 				is_remote_request=1,
 				service_name="Zoom",
-				request_headers=headers,
 				status="Failed",
 			)
 			frappe.throw(frappe._(f"Failed to add registrant: {response.text}"))
 
 		data = response.json()
-		create_request_log(
-			data, is_remote_request=1, service_name="Zoom", request_headers=headers, status="Completed"
-		)
+		create_request_log(data, is_remote_request=1, service_name="Zoom", status="Completed")
 
 		if is_webinar_plus:
 			ticket = data.get("tickets", [{}])[0]
