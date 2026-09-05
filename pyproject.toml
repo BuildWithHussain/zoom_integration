@@ -58,4 +58,4 @@ quote-style = "double"
 indent-style = "tab"
 # docstring-code-format = true
 [tool.bench.frappe-dependencies]
-frappe = ">=16.0.0,<18.0.0"
+frappe = ">=16.0.0-dev,<18.0.0"
